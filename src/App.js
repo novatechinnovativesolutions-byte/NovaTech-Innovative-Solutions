@@ -5,7 +5,8 @@ import Home from './components/Home';
 import About from './components/About';
 import Features from './components/Features';
 import Contact from './components/Contact';
-import Carrer from './components/Carrer'; // ✅ Make sure the file is named Carrer.jsx and exported correctly
+import Carrer from './components/Carrer'; 
+import Pricing from './components/Pricing'; 
 import Footer from './components/Footer';
 
 
@@ -19,7 +20,8 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/career" element={<Carrer />} /> {/* ✅ Fix added */}
+        <Route path="/career" element={<Carrer />} /> 
+        <Route path="/pricing" element={<Pricing />} /> 
       </Routes>
        <Footer />
     </Router>
