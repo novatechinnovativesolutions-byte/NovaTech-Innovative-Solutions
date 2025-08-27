@@ -130,11 +130,18 @@ const Navbar = () => {
             <li><Link to="/about" style={styles.link} onClick={() => setIsOpen(false)}>About Us</Link></li>
             <li><Link to="/features" style={styles.link} onClick={() => setIsOpen(false)}>Services</Link></li>
             <li><Link to="/career" style={styles.link} onClick={() => setIsOpen(false)}>Careers</Link></li>
+              <li><Link to="/pricing" style={styles.link} onClick={() => setIsOpen(false)}>Pricing</Link></li>
             <li>
-              <Link to="/contact" style={styles.link} onClick={() => setIsOpen(false)}>
-                <button style={styles.button}>Get in touch</button>
-              </Link>
-            </li>
+  <a 
+    href="https://wa.me/918336001208?text=Hello, I need some help with my Project !" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    style={styles.link} 
+    onClick={() => setIsOpen(false)}
+  >
+    <button style={styles.button}>Get in touch</button>
+  </a>
+</li>
           </ul>
         </nav>
       </div>
