@@ -28,11 +28,9 @@ const styles = {
     margin: "0 auto",
     lineHeight: 1.6,
   },
-
-  // Pricing grid
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(5, 1fr)", // now 5 columns
+    gridTemplateColumns: "repeat(5, 1fr)",
     gap: "20px",
     marginTop: "40px",
     alignItems: "stretch",
@@ -118,16 +116,6 @@ const styles = {
     width: "100%",
     boxShadow: "0 6px 18px rgba(0, 74, 173, 0.12)",
   },
-  outlineBtn: {
-    background: "#fff",
-    color: "#004aad",
-    border: "2px solid #004aad",
-    padding: "10px 16px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: 700,
-    width: "100%",
-  },
   note: {
     marginTop: "30px",
     textAlign: "center",
@@ -137,6 +125,45 @@ const styles = {
 };
 
 const plans = [
+  {
+    id: "consultancy",
+    title: "Only Consultancy",
+    badge: "Guidance & Mentorship",
+    price: "₹500",
+    priceSub: "Per project guidance",
+    features: [
+      "1:1 live consultation sessions",
+      "Step-by-step guidance to build project",
+      "Help with selecting tools & tech",
+      "2 weeks support",
+    ],
+  },
+  {
+    id: "docs-only",
+    title: "Docs & Reports",
+    badge: "College Ready",
+    price: "₹100 - 500",
+    priceSub: "Per Doc",
+    features: [
+      "Project Report (IEEE / College format)",
+      "Flowcharts & block diagrams",
+      "Plagiarism check support",
+      "1 week support",
+    ],
+  },
+  {
+    id: "docs-ppt",
+    title: "Docs + PPT + Assignments",
+    badge: "Academic Pack",
+    price: "₹50 - 500",
+    priceSub: "Per Doc",
+    features: [
+      "Full report documentation",
+      "Presentation PPT (10–15 slides)",
+      "Assignments & writeups",
+      "2 weeks support",
+    ],
+  },
   {
     id: "model-only",
     title: "Model Only",
@@ -237,7 +264,10 @@ const Pricing = () => {
         <header style={styles.header}>
           <h2 style={styles.title}>Pricing Packages</h2>
           <p style={styles.subtitle}>
-            Clear, affordable, and <b>negotiable</b> pricing designed for students, researchers, startups, and industry professionals. From a working prototype to a complete research-ready package — choose what fits your needs, and we’ll make it work for you.
+            Clear, affordable, and <b>negotiable</b> pricing designed for
+            students, researchers, startups, and industry professionals. Choose
+            from consultancy, documentation, or full project delivery — whatever
+            fits your needs, we’ll make it work for you.
           </p>
         </header>
 
