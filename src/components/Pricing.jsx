@@ -183,7 +183,7 @@ const plans = [
     id: "model-only",
     title: "Project Model Only",
     badge: "Proof-of-Concept",
-    price: "*₹6,000",
+    price: "*₹5,000",
     priceSub: "One-time",
     features: [
       "Working prototype / model",
@@ -196,7 +196,7 @@ const plans = [
     id: "project-doc-paper",
     title: "Project + Doc + Paper",
     badge: "Final Year Ready",
-    price: "₹16,000+",
+    price: "*₹9,000",
     priceSub: "One-time",
     features: [
       "Everything in Project + Doc",
@@ -209,7 +209,7 @@ const plans = [
     id: "paper-ppt",
     title: "Research Paper + PPT",
     badge: "Publication Pack",
-    price: "₹8,000+",
+    price: "*₹4,000",
     priceSub: "One-time",
     features: [
       "Polished research paper (submit-ready)",
