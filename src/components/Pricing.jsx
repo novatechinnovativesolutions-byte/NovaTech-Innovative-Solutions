@@ -2,10 +2,10 @@ import React from "react";
 
 const styles = {
   section: {
-    backgroundColor: "#ffffff",
-    padding: "60px 20px",
+    background: "linear-gradient(180deg, #f9fbff 0%, #ffffff 100%)",
+    padding: "70px 20px",
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: "#222",
+    color: "#1a1a2e",
   },
   container: {
     maxWidth: "1200px",
@@ -13,73 +13,73 @@ const styles = {
   },
   header: {
     textAlign: "center",
-    marginBottom: "30px",
+    marginBottom: "50px",
   },
   title: {
-    fontSize: "32px",
-    fontWeight: 700,
-    color: "#004aad",
-    marginBottom: "10px",
+    fontSize: "36px",
+    fontWeight: 800,
+    color: "#003580",
+    marginBottom: "12px",
   },
   subtitle: {
-    fontSize: "16px",
-    color: "#555",
-    maxWidth: "800px",
+    fontSize: "17px",
+    color: "#444",
+    maxWidth: "750px",
     margin: "0 auto",
-    lineHeight: 1.6,
+    lineHeight: 1.7,
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(5, 1fr)",
-    gap: "20px",
+    gridTemplateColumns: "repeat(4, 1fr)",
+    gap: "28px",
     marginTop: "40px",
     alignItems: "stretch",
   },
   card: {
-    background: "#f8fbff",
-    border: "2px solid #e6f0ff",
-    borderRadius: "12px",
-    padding: "22px",
+    background: "#ffffff",
+    border: "1px solid #e0e8ff",
+    borderRadius: "16px",
+    padding: "28px 22px",
     textAlign: "center",
-    boxShadow: "0 8px 20px rgba(4, 36, 97, 0.05)",
+    boxShadow: "0 6px 18px rgba(0,0,0,0.05)",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    transition: "transform 0.25s ease, box-shadow 0.25s ease",
+    transition: "all 0.3s ease",
     cursor: "default",
   },
   badge: {
     display: "inline-block",
-    padding: "6px 10px",
+    padding: "7px 12px",
     borderRadius: "999px",
-    background: "#fff7cc",
-    color: "#7a6400",
-    fontWeight: 700,
-    fontSize: "12px",
-    marginBottom: "14px",
-    border: "1px solid #ffe58a",
+    background: "#e6f0ff",
+    color: "#003580",
+    fontWeight: 600,
+    fontSize: "13px",
+    marginBottom: "16px",
+    border: "1px solid #c9deff",
   },
   planTitle: {
-    fontSize: "20px",
+    fontSize: "22px",
     fontWeight: 700,
     color: "#004aad",
-    marginBottom: "8px",
+    marginBottom: "12px",
   },
   price: {
-    fontSize: "28px",
+    fontSize: "30px",
     fontWeight: 800,
-    color: "#1a1a2e",
+    color: "#111",
     marginBottom: "6px",
   },
   priceSub: {
     fontSize: "14px",
-    color: "#555",
-    marginBottom: "16px",
+    color: "#666",
+    marginBottom: "18px",
   },
   features: {
     textAlign: "left",
-    marginTop: "8px",
-    marginBottom: "18px",
+    marginTop: "10px",
+    marginBottom: "20px",
     flex: "1 0 auto",
   },
   featItem: {
@@ -93,7 +93,7 @@ const styles = {
   check: {
     minWidth: "20px",
     height: "20px",
-    borderRadius: "4px",
+    borderRadius: "50%",
     background: "#004aad",
     color: "#fff",
     display: "inline-flex",
@@ -103,24 +103,26 @@ const styles = {
     fontWeight: 700,
   },
   cta: {
-    marginTop: "18px",
+    marginTop: "20px",
   },
   primaryBtn: {
-    background: "#004aad",
+    background: "linear-gradient(90deg, #004aad, #0077ff)",
     color: "#fff",
     border: "none",
-    padding: "10px 16px",
-    borderRadius: "8px",
+    padding: "12px 18px",
+    borderRadius: "10px",
     cursor: "pointer",
     fontWeight: 700,
     width: "100%",
-    boxShadow: "0 6px 18px rgba(0, 74, 173, 0.12)",
+    fontSize: "15px",
+    transition: "all 0.25s ease",
+    boxShadow: "0 6px 16px rgba(0,74,173,0.2)",
   },
   note: {
-    marginTop: "30px",
+    marginTop: "40px",
     textAlign: "center",
     color: "#555",
-    fontSize: "14px",
+    fontSize: "15px",
   },
 };
 
@@ -133,30 +135,43 @@ const plans = [
     priceSub: "Per project guidance",
     features: [
       "1:1 live consultation sessions",
-      "Step-by-step guidance to build project",
+      "Step-by-step guidance",
       "Help with selecting tools & tech",
       "2 weeks support",
     ],
   },
   {
-    id: "docs-only",
-    title: "Docs & Reports",
-    badge: "College Ready",
-    price: "₹100 - 500",
-    priceSub: "Per Doc",
+    id: "personal-website",
+    title: "Personal Website",
+    badge: "Portfolio & Brand Identity",
+    price: "*₹2,500",
+    priceSub: "One-time",
     features: [
-      "Project Report (IEEE / College format)",
-      "Flowcharts & block diagrams",
-      "Plagiarism check support",
-      "1 week support",
+      "Responsive personal/portfolio site",
+      "Modern UI design",
+      "SEO-friendly pages",
+      "Basic hosting support",
+    ],
+  },
+  {
+    id: "app-institute",
+    title: "Personal Application",
+    badge: "Web / Mobile Apps",
+    price: "*₹3,000",
+    priceSub: "Depends on features",
+    features: [
+      "Custom web or mobile application",
+      "Database integration",
+      "Login & user management",
+      "Institute branding",
     ],
   },
   {
     id: "docs-ppt",
     title: "Docs + PPT + Assignments",
     badge: "Academic Pack",
-    price: "₹50 - 500",
-    priceSub: "Per Doc",
+    price: "₹500 – 1,500",
+    priceSub: "Bundle",
     features: [
       "Full report documentation",
       "Presentation PPT (10–15 slides)",
@@ -166,9 +181,9 @@ const plans = [
   },
   {
     id: "model-only",
-    title: "Model Only",
-    badge: "Best for Proof-of-Concept",
-    price: "₹6,000",
+    title: "Project Model Only",
+    badge: "Proof-of-Concept",
+    price: "*₹6,000",
     priceSub: "One-time",
     features: [
       "Working prototype / model",
@@ -178,23 +193,10 @@ const plans = [
     ],
   },
   {
-    id: "project-doc",
-    title: "Project + Documentation",
-    badge: "Student Favorite",
-    price: "₹10,000",
-    priceSub: "One-time",
-    features: [
-      "Complete project (hardware/software)",
-      "Detailed documentation (report)",
-      "Block diagrams & flowcharts",
-      "2 weeks support",
-    ],
-  },
-  {
     id: "project-doc-paper",
     title: "Project + Doc + Paper",
-    badge: "Research Ready",
-    price: "₹16,000",
+    badge: "Final Year Ready",
+    price: "₹16,000+",
     priceSub: "One-time",
     features: [
       "Everything in Project + Doc",
@@ -206,13 +208,13 @@ const plans = [
   {
     id: "paper-ppt",
     title: "Research Paper + PPT",
-    badge: "Publication & Presentation",
-    price: "₹8,000",
+    badge: "Publication Pack",
+    price: "₹8,000+",
     priceSub: "One-time",
     features: [
-      "Polished research paper (ready to submit)",
+      "Polished research paper (submit-ready)",
       "Presentation PPT (10–15 slides)",
-      "Figures / Charts prepared",
+      "Figures & charts prepared",
       "1 week support",
     ],
   },
@@ -255,8 +257,12 @@ const Pricing = () => {
           }
         }
         .plan-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 18px 40px rgba(4,36,97,0.12);
+          transform: translateY(-8px) scale(1.02);
+          box-shadow: 0 20px 40px rgba(0,74,173,0.15);
+        }
+        .plan-card button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 24px rgba(0,74,173,0.25);
         }
       `}</style>
 
@@ -265,9 +271,7 @@ const Pricing = () => {
           <h2 style={styles.title}>Pricing Packages</h2>
           <p style={styles.subtitle}>
             Clear, affordable, and <b>negotiable</b> pricing designed for
-            students, researchers, startups, and industry professionals. Choose
-            from consultancy, documentation, or full project delivery — whatever
-            fits your needs, we’ll make it work for you.
+            students, researchers, startups, and industry professionals.
           </p>
         </header>
 
