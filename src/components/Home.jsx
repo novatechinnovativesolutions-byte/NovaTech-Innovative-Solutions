@@ -47,14 +47,8 @@ const styles = {
     maxWidth: "500px",
     color: "#444",
   },
-  heroBanner: {
-    flex: 1,
-    borderRadius: "12px",
-  },
-  heroImage: {
-    width: "100%",
-    borderRadius: "12px",
-  },
+  heroBanner: { flex: 1, borderRadius: "12px" },
+  heroImage: { width: "100%", borderRadius: "12px" },
 
   /* Section Titles */
   sectionTitle: {
@@ -90,11 +84,7 @@ const styles = {
     textAlign: "center",
     transition: "0.3s ease",
   },
-  aboutCardImage: {
-    width: "80px",
-    height: "80px",
-    marginBottom: "15px",
-  },
+  aboutCardImage: { width: "80px", height: "80px", marginBottom: "15px" },
   aboutCardTitle: {
     fontSize: "1.2rem",
     margin: "10px 0",
@@ -124,10 +114,7 @@ const styles = {
     textAlign: "center",
     transition: "0.3s ease",
   },
-  featuresImage: {
-    width: "100px",
-    marginBottom: "15px",
-  },
+  featuresImage: { width: "100px", marginBottom: "15px" },
   itemTitle: {
     fontSize: "1.3rem",
     marginBottom: "10px",
@@ -145,11 +132,7 @@ const styles = {
     width: "90%",
   },
   ctaTitle: { fontSize: "1.8rem", marginBottom: "20px" },
-  ctaForm: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px",
-  },
+  ctaForm: { display: "flex", justifyContent: "center", gap: "10px" },
   ctaInput: {
     padding: "12px",
     borderRadius: "6px",
@@ -176,6 +159,7 @@ const styles = {
   },
   inputField: {
     width: "100%",
+    alignItems: "center",
     padding: "12px",
     borderRadius: "6px",
     border: "1px solid #ddd",
@@ -185,31 +169,14 @@ const styles = {
 const Home = () => {
   return (
     <div id="top">
-      {/* ✅ Inject responsive CSS here */}
       <style>{`
         @media (max-width: 768px) {
-          section {
-            padding: 40px 20px !important;
-          }
-          .hero {
-            flex-direction: column !important;
-            text-align: center !important;
-          }
-          .hero div {
-            text-align: center !important;
-          }
-          .ctaForm {
-            flex-direction: column !important;
-            align-items: center !important;
-          }
-          .ctaInput {
-            width: 100% !important;
-            margin-bottom: 15px !important;
-          }
-          ul {
-            flex-direction: column !important;
-            align-items: center !important;
-          }
+          section { padding: 40px 20px !important; }
+          .hero { flex-direction: column !important; text-align: center !important; }
+          .hero div { text-align: center !important; }
+          .ctaForm { flex-direction: column !important; align-items: center !important; }
+          .ctaInput { width: 100% !important; margin-bottom: 15px !important; }
+          ul { flex-direction: column !important; align-items: center !important; }
         }
       `}</style>
 
@@ -219,13 +186,11 @@ const Home = () => {
           <section className="hero" style={styles.hero}>
             <div style={styles.container}>
               <div style={styles.heroContent}>
-                <h1 style={styles.heroTitle}>
-                  Empowering Innovation with Tech Solutions
-                </h1>
+                <h1 style={styles.heroTitle}>Empowering Innovation with Tech</h1>
                 <p style={styles.heroText}>
-                  NovaTech Innovative Solutions delivers end-to-end hardware and
-                  software systems—designed, developed, and deployed with
-                  passion.
+                  NovaTech Innovative Solutions delivers <b>software</b>, <b>hardware</b>,{" "}
+                  <b>academic project guidance</b>, and <b>training/workshops</b>—
+                  designed, developed, and deployed with passion.
                 </p>
                 <a href="/about">
                   <button style={{ ...styles.btn, ...styles.btnPrimary }}>
@@ -246,47 +211,59 @@ const Home = () => {
 
           {/* ABOUT SECTION */}
           <section style={styles.container}>
-            <h2 style={styles.sectionTitle}>What We Offer</h2>
+            <h2 style={styles.sectionTitle}>What We Provide</h2>
             <p style={styles.sectionText}>
-              From academic prototypes to industrial deployments, NovaTech is
-              your partner in innovation across Embedded Systems, IoT, AI, and
-              full-stack software.
+              From <b>academic prototypes</b> to <b>industrial deployments</b>,
+              NovaTech is your partner in <b>Embedded Systems</b>, <b>IoT</b>,{" "}
+              <b>AI</b>, and <b>full-stack software</b>.
             </p>
             <ul style={styles.aboutList}>
               <li style={styles.aboutCard}>
                 <img
-                  src="https://cdn-icons-png.flaticon.com/512/1055/1055687.png"
+                  src="   https://cdn-icons-png.flaticon.com/512/6702/6702322.png"
                   alt="IoT"
                   style={styles.aboutCardImage}
                 />
-                <h3 style={styles.aboutCardTitle}>Embedded & IoT Systems</h3>
+                <h3 style={styles.aboutCardTitle}>Hardware & IoT Solutions</h3>
                 <p>
-                  Custom-built microcontroller-based systems for real-world
-                  automation and monitoring.
+                  Custom-built electronics, embedded systems, and real-world IoT
+                  applications for automation and monitoring.
                 </p>
               </li>
               <li style={styles.aboutCard}>
                 <img
-                  src="https://cdn-icons-png.flaticon.com/512/906/906324.png"
+                  src="https://cdn-icons-png.flaticon.com/512/10061/10061767.png"
                   alt="Software"
                   style={styles.aboutCardImage}
                 />
                 <h3 style={styles.aboutCardTitle}>Software Development</h3>
                 <p>
-                  From MERN stack web apps to Java-based desktop systems, we
-                  bring software to life.
+                  Scalable MERN stack web apps, mobile applications, and
+                  enterprise software solutions.
                 </p>
               </li>
               <li style={styles.aboutCard}>
                 <img
-                  src="https://cdn-icons-png.flaticon.com/512/4712/4712027.png"
+                  src="   https://cdn-icons-png.flaticon.com/512/8055/8055576.png "
                   alt="AI"
                   style={styles.aboutCardImage}
                 />
                 <h3 style={styles.aboutCardTitle}>AI & Automation Projects</h3>
                 <p>
-                  Integrating Machine Learning, TinyML, and automation into
-                  modern problem-solving solutions.
+                  Harnessing AI, ML, and automation to create smarter, future-ready
+                  solutions.
+                </p>
+              </li>
+              <li style={styles.aboutCard}>
+                <img
+                  src="   https://cdn-icons-png.flaticon.com/512/1831/1831971.png "
+                  alt="Training"
+                  style={styles.aboutCardImage}
+                />
+                <h3 style={styles.aboutCardTitle}>Training & Workshops</h3>
+                <p>
+                  Hands-on programs for students and professionals in IoT,
+                  robotics, AI, and full-stack development.
                 </p>
               </li>
             </ul>
@@ -295,25 +272,22 @@ const Home = () => {
           {/* FEATURES */}
           <section style={styles.features}>
             <div style={styles.container}>
-              <h2 style={styles.sectionTitle}>
-                What Makes NovaTech Different?
-              </h2>
+              <h2 style={styles.sectionTitle}>Why Choose NovaTech?</h2>
               <p style={styles.sectionText}>
-                A passionate team of engineers, developers, and innovators from
-                diverse backgrounds—dedicated to bringing your tech ideas to
-                life.
+                A passionate team of engineers, developers, and innovators dedicated
+                to bringing your ideas to life.
               </p>
               <ul style={styles.featuresList}>
                 <li style={styles.featuresItem}>
                   <img
-                    src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                    alt="Project Approach"
+                    src="https://cdn-icons-png.flaticon.com/512/4712/4712100.png"
+                    alt="Guidance"
                     style={styles.featuresImage}
                   />
-                  <h3 style={styles.itemTitle}>Project-Based Approach</h3>
+                  <h3 style={styles.itemTitle}>End-to-End Project Guidance</h3>
                   <p>
-                    Whether it's a final-year project or a full commercial
-                    product, we tailor our process to meet your goal.
+                    From idea validation to final deployment—ideal for both students
+                    and businesses.
                   </p>
                 </li>
                 <li style={styles.featuresItem}>
@@ -324,8 +298,8 @@ const Home = () => {
                   />
                   <h3 style={styles.itemTitle}>Transparent & Affordable</h3>
                   <p>
-                    Clear pricing, honest communication, and results-driven
-                    execution—no hidden charges, ever.
+                    Clear pricing, open communication, and high-quality results—
+                    with no hidden charges.
                   </p>
                 </li>
               </ul>
@@ -334,11 +308,13 @@ const Home = () => {
 
           {/* CTA */}
           <section style={styles.cta}>
-            <h3 style={styles.ctaTitle}>Let’s Work Together</h3>
-            <form className="ctaForm" style={styles.ctaForm}
-            action="https://docs.google.com/forms/d/1Z5UN_RCFAV1hdX7gVK2Pj8TiJzTuFK0zOgxCAflycRE/formResponse"
-                method="POST"
-                target="_blank"
+            <h3 style={styles.ctaTitle}>Let’s Build the Future Together 🚀</h3>
+            <form
+              className="ctaForm"
+              style={styles.ctaForm}
+              action="https://docs.google.com/forms/d/1Z5UN_RCFAV1hdX7gVK2Pj8TiJzTuFK0zOgxCAflycRE/formResponse"
+              method="POST"
+              target="_blank"
             >
               <input
                 type="email"
@@ -353,7 +329,7 @@ const Home = () => {
             </form>
           </section>
 
-         {/* CONTACT with Google Form */}
+          {/* CONTACT */}
           <section style={styles.contact}>
             <div style={styles.container}>
               <h2 style={styles.sectionTitle}>Start Building with NovaTech</h2>
@@ -365,15 +341,32 @@ const Home = () => {
               >
                 <div style={styles.inputWrapper}>
                   <label style={styles.inputLabel}>Name</label>
-                  <input type="text" name="entry.1345170053" style={styles.inputField} placeholder="Type Name" required />
+                  <input
+                    type="text"
+                    name="entry.1345170053"
+                    style={styles.inputField}
+                    placeholder="Type Name"
+                    required
+                  />
                 </div>
                 <div style={styles.inputWrapper}>
                   <label style={styles.inputLabel}>Phone</label>
-                  <input type="tel" name="entry.1254174415" style={styles.inputField} placeholder="Type Phone" />
+                  <input
+                    type="tel"
+                    name="entry.1254174415"
+                    style={styles.inputField}
+                    placeholder="Type Phone"
+                  />
                 </div>
                 <div style={styles.inputWrapper}>
                   <label style={styles.inputLabel}>Email</label>
-                  <input type="email" name="entry.585538982" style={styles.inputField} placeholder="Type Email" required />
+                  <input
+                    type="email"
+                    name="entry.585538982"
+                    style={styles.inputField}
+                    placeholder="Type Email"
+                    required
+                  />
                 </div>
                 <div style={styles.inputWrapper}>
                   <label style={styles.inputLabel}>How can we help?</label>
@@ -383,7 +376,10 @@ const Home = () => {
                     placeholder="Type Description"
                   ></textarea>
                 </div>
-                <button type="submit" style={{ ...styles.btn, ...styles.btnPrimary }}>
+                <button
+                  type="submit"
+                  style={{ ...styles.btn, ...styles.btnPrimary }}
+                >
                   Send Message
                 </button>
               </form>
