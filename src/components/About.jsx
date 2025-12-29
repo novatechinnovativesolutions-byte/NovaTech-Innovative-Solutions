@@ -166,7 +166,7 @@ const AboutUs = () => {
           <h2 style={styles.sectionTitle}>Message from the Founder & CEO</h2>
           <div style={styles.ceoMessage}>
             <img
-              src="https://media.licdn.com/dms/image/v2/D5603AQGGZ-v9U2nylA/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1728062431795?e=2147483647&v=beta&t=8ThumINCZb8nZ_zUCkzyWH0elH5hdIrbsayRk-8sc5c"
+              src="https://media.licdn.com/dms/image/v2/D4D03AQGjHj7LaQdGlA/profile-displayphoto-crop_800_800/B4DZrKUgaoIkAQ-/0/1764330966549?e=1768435200&v=beta&t=z53NAqWCkb-f78VwnBvx5nNePdps19wySIHSUa-D3i0"
               alt="Chandramouli Haldar"
               style={styles.ceoImage}
             />
@@ -193,3 +193,4 @@ const AboutUs = () => {
 };
 
 export default AboutUs;
+
