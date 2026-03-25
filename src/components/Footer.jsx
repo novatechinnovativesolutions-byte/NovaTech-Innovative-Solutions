@@ -118,6 +118,7 @@ const Footer = () => {
       width: isMobile ? "35px" : "40px",
       height: isMobile ? "35px" : "40px",
       display: "flex",
+        zIndex: 9999,          // ✅ brings it to front
       alignItems: "center",
       justifyContent: "center",
       fontSize: isMobile ? "16px" : "18px",
@@ -133,7 +134,7 @@ const Footer = () => {
         <div style={styles.top}>
           {/* Brand Section */}
           <div style={styles.brand}>
-            <a href="#">
+            <a href="https://novatech-is.in/">
               <img
                 src="https://raw.githubusercontent.com/NovaTech-Innovate-Solutions/NovaTech-Innovate-Solutions.github.io/refs/heads/main/logofianla-removebg-preview.png"
                 alt="NovaTech logo"
@@ -213,7 +214,7 @@ const Footer = () => {
 
         {/* Bottom */}
         <div style={styles.bottom}>
-          <p>&copy; 2025 NovaTech Innovative Solutions. All rights reserved.</p>
+          <p>&copy; 2026 NovaTech Innovative Solutions. All rights reserved.</p>
         </div>
 
         {/* Go to Top */}
