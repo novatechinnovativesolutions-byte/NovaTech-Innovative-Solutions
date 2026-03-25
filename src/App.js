@@ -1,29 +1,52 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import About from './components/About';
-import Features from './components/Features';
-import Contact from './components/Contact';
-import Carrer from './components/Carrer'; 
-import Pricing from './components/Pricing'; 
-import Footer from './components/Footer';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
-const App = () => {
+import Home from "./components/Home";
+import About from "./components/About";
+import Features from "./components/Features";
+import Contact from "./components/Contact";
+import Career from "./components/Carrer";
+import Pricing from "./components/Pricing";
+import NovaTechLab from "./components/NovaTechLab";
+import Projectmaker from "./components/projectmaker";
+
+// 🔥 Layout Wrapper
+const Layout = () => {
+  const location = useLocation();
+
+  // ❗ Hide ONLY Navbar on Lab page
+  const hideNavbar = location.pathname === "/lab";
+
   return (
-    <Router>
-      <Navbar />
+    <>
+      {!hideNavbar && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/career" element={<Carrer />} /> 
-        <Route path="/pricing" element={<Pricing />} /> 
+        <Route path="/career" element={<Career />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/projectmaker" element={<Projectmaker />} />
+
+        {/* ✅ R&D Lab */}
+        <Route path="/lab" element={<NovaTechLab />} />
       </Routes>
-       <Footer />
+
+      {/* ✅ Footer ALWAYS visible */}
+      <Footer />
+    </>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <Layout />
     </Router>
   );
 };
