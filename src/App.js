@@ -11,7 +11,6 @@ import Contact from "./components/Contact";
 import Career from "./components/Carrer";
 import Pricing from "./components/Pricing";
 import NovaTechLab from "./components/NovaTechLab";
-import Projectmaker from "./components/projectmaker";
 
 // 🔥 Layout Wrapper
 const Layout = () => {
@@ -31,7 +30,6 @@ const Layout = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career />} />
         <Route path="/pricing" element={<Pricing />} />
-        <Route path="/projectmaker" element={<Projectmaker />} />
 
         {/* ✅ R&D Lab */}
         <Route path="/lab" element={<NovaTechLab />} />
