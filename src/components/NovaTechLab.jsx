@@ -820,7 +820,6 @@ export default function NovaTechLab() {
                 style={{
                   padding: "8px 24px",
                   borderRadius: 40,
-                  border: "none",
                   background: pubTab === tab.id ? "rgba(59,130,246,0.3)" : "transparent",
                   color: pubTab === tab.id ? "var(--accent-yellow)" : "var(--text-secondary)",
                   fontWeight: 600,
