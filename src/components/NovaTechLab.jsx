@@ -134,7 +134,7 @@ const PUBLICATIONS = [
     year: "2026",
     type: "Preprint",
     title: "An ESP32-Based Morse Code Transmission System Using Telegram Bot",
-    venue: "arXiv / Preprints",
+    venue: "Preprints",
     authors: "NovaTech R&D Lab",
     doi: "10.20944/preprints202602.1999.v1",
   },
@@ -168,7 +168,6 @@ const TEAM = [
   { name: "Chandramouli Haldar", role: "Founder & CEO", focus: "TinyML, Robotics, IoT", avatar: "CH" },
   { name: "Shrijoy Biswas", role: "Senior Hardware Engineer", focus: "Analog & Digital Electronics, PCB Design", avatar: "SB" },
   { name: "Anshuman Shaw", role: "IoT & Electrical Systems Lead", focus: "ESP32, Arduino, Electrical Systems", avatar: "AS" },
-  // { name: "Dr. Soumik Podder", role: "Research Advisor", focus: "Multidisciplinary", avatar: "SP" },
 ];
 
 const SERVICES = [
@@ -198,7 +197,7 @@ export default function NovaTechLab() {
   const [pubTab, setPubTab] = useState("research");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
-  const [isDarkMode, setIsDarkMode] = useState(false); // true = dark, false = light
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -207,7 +206,8 @@ export default function NovaTechLab() {
   }, []);
 
   const scrollTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    const element = document.getElementById(id);
+    if (element) element.scrollIntoView({ behavior: "smooth" });
     setMobileMenuOpen(false);
   };
 
@@ -258,28 +258,107 @@ export default function NovaTechLab() {
       margin: 0;
       font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     }
+    /* Responsive base styles */
+    .section-padding {
+      padding: 80px 48px;
+    }
+    .hero-padding {
+      padding: 120px 48px 140px;
+    }
+    .stats-padding {
+      padding: 40px 48px;
+    }
+    .navbar-padding {
+      padding: 0 48px;
+    }
     @media (max-width: 768px) {
-      .section-padding { padding: 60px 24px !important; }
-          .navbar: { width: 90%; }
-      .navbar-padding { padding: 0 24px !important; }
-      .hero-padding { padding: 100px 24px 100px !important; }
-      .stats-padding { padding: 30px 24px !important; }
-      .stats-container { gap: 40px !important; }
-      .about-flex { flex-direction: column !important; gap: 40px !important; }
-      .vision-cards { gap: 16px !important; }
-      .card-grid, .project-grid, .team-grid, .services-grid { grid-template-columns: 1fr !important; }
-      .tech-stack-flex { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
-      .publication-tabs { flex-wrap: wrap !important; gap: 12px !important; }
-      .publication-item { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
-      .publication-year { text-align: left !important; min-width: auto !important; }
-      .hero-title { font-size: 2rem !important; }
-      .hero-sub { font-size: 16px !important; }
-      .stat-value { font-size: 32px !important; }
-      .contact-grid { grid-template-columns: 1fr !important; gap: 16px !important; }
+      .section-padding {
+        padding: 60px 24px !important;
+      }
+      .hero-padding {
+        padding: 100px 24px 100px !important;
+      }
+      .stats-padding {
+        padding: 30px 24px !important;
+      }
+      .navbar-padding {
+        padding: 0 24px !important;
+      }
+      .about-flex {
+        flex-direction: column !important;
+        gap: 40px !important;
+      }
+      .vision-cards {
+        gap: 16px !important;
+      }
+      .card-grid,
+      .project-grid,
+      .team-grid,
+      .services-grid {
+        grid-template-columns: 1fr !important;
+      }
+      .tech-stack-flex {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+      }
+      .publication-tabs {
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+      }
+      .publication-item {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 16px !important;
+      }
+      .publication-year {
+        text-align: left !important;
+        min-width: auto !important;
+      }
+      .hero-title {
+        font-size: 2rem !important;
+      }
+      .hero-sub {
+        font-size: 16px !important;
+      }
+      .stat-value {
+        font-size: 32px !important;
+      }
+      .contact-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .logo-image {
+        height: 60px !important;
+        width: auto !important;
+      }
+    }
+    @media (max-width: 480px) {
+      .section-padding {
+        padding: 48px 16px !important;
+      }
+      .hero-padding {
+        padding: 80px 16px 80px !important;
+      }
+      .stats-padding {
+        padding: 24px 16px !important;
+      }
+      .navbar-padding {
+        padding: 0 16px !important;
+      }
+      .hero-title {
+        font-size: 1.75rem !important;
+      }
+      .stat-value {
+        font-size: 28px !important;
+      }
+      .stats-container {
+        gap: 20px !important;
+      }
     }
   `;
 
-  // Inline styles that use CSS variables
+  // Inline styles using CSS variables
   const styles = {
     container: {
       background: "var(--bg-primary)",
@@ -292,22 +371,23 @@ export default function NovaTechLab() {
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
-      padding: "0 48px",
       height: 72,
       background: isDarkMode ? "rgba(10,12,21,0.85)" : "#ffffff",
       backdropFilter: isDarkMode ? "blur(12px)" : "none",
       position: "fixed",
-       width: "95%",
       top: 0,
-       zIndex: 9999, // ✅ above everything
+      left: 0,
+      right: 0,
+      zIndex: 9999,
       borderBottom: `1px solid var(--border-color)`,
       boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     },
     logoImage: {
-      height: 90,
-      width: 250,
+      height: 50,
+      width: "auto",
       objectFit: "contain",
       filter: isDarkMode ? "drop-shadow(0 0 4px #3b82f6)" : "none",
+      transition: "height 0.3s",
     },
     navLink: {
       background: "none",
@@ -367,25 +447,28 @@ export default function NovaTechLab() {
       transition: "transform 0.3s ease",
     },
     hero: {
-      padding: "120px 48px 140px",
       textAlign: "center",
       position: "relative",
       overflow: "hidden",
       background: isDarkMode ? "radial-gradient(circle at 20% 30%, rgba(59,130,246,0.15), transparent 70%)" : "linear-gradient(135deg, #ffffff 0%, #fff9ed 50%, #eef4ff 100%)",
     },
-  heroTitle: {
-  fontSize: "clamp(2.5rem, 6vw, 4rem)",
-  fontWeight: 800,
-  margin: "0 0 20px",
-  lineHeight: 1.2,
-  background: isDarkMode
-    ? "linear-gradient(135deg, #ffffff, var(--accent-blue), var(--accent-yellow))"
-    : "none",
-  WebkitBackgroundClip: isDarkMode ? "text" : "initial",
-  WebkitTextFillColor: isDarkMode ? "transparent" : "var(--text-primary)",
-
-  color: isDarkMode ? "transparent" : "var(--text-primary)", // ✅ fallback
-},
+    heroTitle: {
+      fontSize: "clamp(2.5rem, 6vw, 4rem)",
+      fontWeight: 800,
+      margin: "0 0 20px",
+      lineHeight: 1.2,
+      background: isDarkMode ? "linear-gradient(135deg, #ffffff, var(--accent-blue), var(--accent-yellow))" : "none",
+      WebkitBackgroundClip: isDarkMode ? "text" : "initial",
+      WebkitTextFillColor: isDarkMode ? "transparent" : "var(--text-primary)",
+      color: isDarkMode ? "transparent" : "var(--text-primary)",
+    },
+    neonText: {
+      display: "inline-block",
+      background: "linear-gradient(135deg, var(--accent-blue), var(--accent-yellow))",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      backgroundClip: "text",
+    },
     heroSub: {
       fontSize: 18,
       color: "var(--text-secondary)",
@@ -434,7 +517,6 @@ export default function NovaTechLab() {
       border: `1px solid var(--border-color)`,
       transition: "all 0.3s",
     },
-  
     input: {
       background: isDarkMode ? "rgba(10,12,21,0.6)" : "#fff",
       border: `1px solid var(--border-color)`,
@@ -460,12 +542,10 @@ export default function NovaTechLab() {
       resize: "vertical",
     },
     section: {
-      padding: "80px 48px",
       position: "relative",
       zIndex: 2,
     },
     sectionAlt: {
-      padding: "80px 48px",
       background: isDarkMode ? "linear-gradient(135deg, rgba(10,12,21,0.9), rgba(20,30,50,0.9))" : "#fefaf0",
       position: "relative",
       zIndex: 2,
@@ -479,7 +559,6 @@ export default function NovaTechLab() {
       margin: "0 auto",
     },
     statsBar: {
-      padding: "40px 48px",
       background: isDarkMode ? "rgba(10,12,21,0.5)" : "#ffffff",
       borderTop: `1px solid var(--border-color)`,
       borderBottom: `1px solid var(--border-color)`,
@@ -505,7 +584,6 @@ export default function NovaTechLab() {
       gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
       gap: 24,
     },
-    // ... additional styles as needed
   };
 
   return (
@@ -513,12 +591,13 @@ export default function NovaTechLab() {
       <style>{themeVariables}</style>
 
       {/* NAVBAR */}
-      <nav style={{ ...styles.navbar, ...(windowWidth <= 768 ? { padding: "0 24px" } : {}) }} className="navbar-padding">
+      <nav style={styles.navbar} className="navbar-padding">
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img
             src="https://raw.githubusercontent.com/NovaTech-Innovate-Solutions/NovaTech-Innovate-Solutions.github.io/refs/heads/main/RnD%20(1).png"
             alt="NovaTech R&D Lab"
             style={styles.logoImage}
+            className="logo-image"
           />
         </div>
 
@@ -543,7 +622,7 @@ export default function NovaTechLab() {
                 {isDarkMode ? "☀️" : "🌙"}
               </button>
               <button
-               onClick={() => window.open("https://wa.me/918336001208", "_blank")}
+                onClick={() => window.open("https://wa.me/918336001208", "_blank")}
                 style={styles.ctaButton}
                 onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
                 onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
@@ -580,7 +659,7 @@ export default function NovaTechLab() {
             {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
           </button>
           <button
-            onClick={() => scrollTo("contact")}
+            onClick={() => window.open("https://wa.me/918336001208", "_blank")}
             style={{ ...styles.ctaButton, width: "100%", marginTop: 8 }}
           >
             Get in Touch
@@ -589,12 +668,11 @@ export default function NovaTechLab() {
       )}
 
       {/* HERO */}
-      <section style={{ ...styles.hero, ...(windowWidth <= 768 ? { padding: "100px 24px 100px" } : {}) }} className="hero-padding">
+      <section style={styles.hero} className="hero-padding">
         <div style={{ position: "relative", maxWidth: 800, margin: "0 auto", zIndex: 2 }}>
           <div style={{ display: "inline-block", background: isDarkMode ? "rgba(59,130,246,0.2)" : "#fff0d0", border: `1px solid var(--accent-yellow)`, borderRadius: 40, padding: "6px 20px", fontSize: 13, color: "var(--accent-yellow)", marginBottom: 28, fontWeight: 500 }}>
             ⚡ Turning Ideas into Intelligent Systems
           </div>
-          
           <h1 style={styles.heroTitle}>
             NovaTech Innovative Solutions<br />
             <span style={styles.neonText}>Research & Development Lab</span>
@@ -626,7 +704,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* STATS BAR */}
-      <section style={{ ...styles.statsBar, ...(windowWidth <= 768 ? { padding: "30px 24px" } : {}) }} className="stats-padding">
+      <section style={styles.statsBar} className="stats-padding">
         <div style={styles.statsContainer} className="stats-container">
           {STATS.map((s, i) => (
             <div key={i} style={{ textAlign: "center" }}>
@@ -638,7 +716,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* ABOUT */}
-      <section id="about" style={{ ...styles.section, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="about" style={styles.section} className="section-padding">
         <div style={styles.containerMax}>
           <div style={{ display: "flex", gap: 64, alignItems: "center", flexWrap: "wrap" }} className="about-flex">
             <div style={{ flex: "1 1 440px" }}>
@@ -687,7 +765,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* VISION */}
-      <section id="vision" style={{ ...styles.sectionAlt, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="vision" style={styles.sectionAlt} className="section-padding">
         <div style={{ maxWidth: 1100, margin: "auto", textAlign: "center" }}>
           <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>VISION & MISSION</div>
           <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 48 }}>Built to Innovate. Designed to Empower.</h2>
@@ -713,7 +791,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* RESEARCH DOMAINS */}
-      <section id="research" style={{ ...styles.section, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="research" style={styles.section} className="section-padding">
         <div style={styles.containerMax}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>RESEARCH DOMAINS</div>
@@ -738,7 +816,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* PROJECTS */}
-      <section id="projects" style={{ ...styles.sectionAlt, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="projects" style={styles.sectionAlt} className="section-padding">
         <div style={styles.containerMax}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>PROJECTS</div>
@@ -800,7 +878,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* PUBLICATIONS (Tabbed) */}
-      <section id="publications" style={{ ...styles.section, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="publications" style={styles.section} className="section-padding">
         <div style={styles.containerMedium}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>PUBLICATIONS</div>
@@ -898,7 +976,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* TEAM */}
-      <section id="team" style={{ ...styles.sectionAlt, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="team" style={styles.sectionAlt} className="section-padding">
         <div style={styles.containerMax}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>TEAM</div>
@@ -924,7 +1002,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* SERVICES */}
-      <section id="services" style={{ ...styles.section, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section id="services" style={styles.section} className="section-padding">
         <div style={styles.containerMax}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>SERVICES</div>
@@ -949,7 +1027,7 @@ export default function NovaTechLab() {
       </section>
 
       {/* TECH STACK */}
-      <section style={{ ...styles.sectionAlt, ...(windowWidth <= 768 ? { padding: "60px 24px" } : {}) }} className="section-padding">
+      <section style={styles.sectionAlt} className="section-padding">
         <div style={{ maxWidth: 1000, margin: "auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
             <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>LAB INFRASTRUCTURE</div>
@@ -970,14 +1048,14 @@ export default function NovaTechLab() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section style={{ padding: "80px 48px", background: "var(--gradient)", textAlign: "center", marginTop: 4, position: "relative", overflow: "hidden" }}>
-        <h2 style={{ fontSize: "2.2rem", fontWeight: 800, color: "#fff", marginBottom: 20 }}>Ready to Collaborate? 🚀</h2>
+      {/* CTA / CONTACT */}
+      <section id="contact" style={{ padding: "80px 48px", background: "var(--gradient)", textAlign: "center", marginTop: 4, position: "relative", overflow: "hidden" }}>
+        <h2 style={{ fontSize: "clamp(1.8rem, 5vw, 2.2rem)", fontWeight: 800, color: "#fff", marginBottom: 20 }}>Ready to Collaborate? 🚀</h2>
         <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 17, maxWidth: 560, margin: "0 auto 36px" }}>
           Whether you're a researcher, startup, or enterprise — let's build something extraordinary together.
         </p>
         <button
-            onClick={() => window.open("https://wa.me/918336001208", "_blank")}
+          onClick={() => window.open("https://wa.me/918336001208", "_blank")}
           style={{ ...styles.ctaButton, background: "#fff", color: "#0a58ca", boxShadow: "0 6px 14px rgba(0,0,0,0.1)" }}
           onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
           onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
@@ -985,7 +1063,6 @@ export default function NovaTechLab() {
           Start a Conversation →
         </button>
       </section>
-      
-              </div>
+    </div>
   );
 }
