@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 /* ─────────────────────────────────────────────
    SEO: Helmet-style head tags (drop <Head> from
@@ -6,6 +6,10 @@ import React, { useEffect, useRef, useState } from "react";
    ───────────────────────────────────────────── */
 const SEOMeta = () => (
   <>
+  <SEOMeta
+  title="NovaTech Innovative Solutions"
+  description="Software and Hardware Development"
+/>
     {/* Primary meta */}
     <title>NovaTech Innovative Solutions | Software, IoT, AI & Training India</title>
     <meta

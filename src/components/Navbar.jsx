@@ -19,14 +19,13 @@ const NAV_LINKS = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About Us" },
   { to: "/features", label: "Services" },
-    { to: "/pricing", label: "Pricing" },
-  { to: "/lab", label: "R&D Lab" },
+    { to: "/lab", label: "R&D Lab" },
+  { to: "/projects", label: "Projects" },
 ];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
   const location = useLocation();
   const navRef = useRef(null);
 
@@ -40,7 +39,6 @@ const Navbar = () => {
   /* ── Close mobile menu on route change ── */
   useEffect(() => {
     setIsOpen(false);
-    setActiveDropdown(null);
   }, [location.pathname]);
 
   /* ── Close mobile menu on outside click ── */
@@ -432,9 +430,9 @@ const Navbar = () => {
               <nav> + aria-label enables Google to parse
               the navigation landmark separately from content */}
           <nav aria-label="Main navigation">
-            <ul className="nt-nav" role="list">
+            <ul className="nt-nav" role="listitem">
               {NAV_LINKS.map(({ to, label }) => (
-                <li key={to} role="listitem">
+                <li key={to}>
                   <Link
                     to={to}
                     className="nt-link"
@@ -520,9 +518,9 @@ const Navbar = () => {
         </div>
 
         {/* Drawer links */}
-        <ul className="nt-mobile-links" role="list">
+        <ul className="nt-mobile-links" role="listitem">
           {NAV_LINKS.map(({ to, label }) => (
-            <li key={to} role="listitem">
+            <li key={to} >
               <Link
                 to={to}
                 className="nt-mobile-link"
