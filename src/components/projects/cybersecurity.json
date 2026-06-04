@@ -1,0 +1,27 @@
+[
+  {
+    "id": "cyber-1",
+    "title": "Keylogger Detection Tool",
+    "domain": "Cybersecurity",
+    "level": "Advanced",
+    "stack": ["Python", "psutil", "Tkinter"],
+    "blurb": "Detects and warns users about hidden keyloggers running on their system.",
+    "details": {
+      "how": "Scans system processes and flags suspicious activity based on patterns.",
+      "tech": "Python, psutil, Tkinter GUI",
+      "features": [
+        "Real-time monitoring",
+        "Alerts for suspicious processes"
+      ],
+      "code": [
+        "https://github.com/example/keylogger-detector"
+      ],
+      "images": [
+        "/assets/projects/keylogger.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/cyber321"
+      ]
+    }
+  }
+]

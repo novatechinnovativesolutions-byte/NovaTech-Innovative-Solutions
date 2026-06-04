@@ -1,0 +1,27 @@
+[
+  {
+    "id": "ds-1",
+    "title": "Stock Price Prediction",
+    "domain": "Data Science",
+    "level": "Intermediate",
+    "stack": ["Python", "Pandas", "Scikit-Learn"],
+    "blurb": "Predicts stock price trends using ML regression models.",
+    "details": {
+      "how": "Trains a regression model on historical stock data and predicts future prices.",
+      "tech": "Pandas, Scikit-Learn, Matplotlib",
+      "features": [
+        "Predicts future stock prices",
+        "Visual trend graphs"
+      ],
+      "code": [
+        "https://github.com/example/stock-predictor"
+      ],
+      "images": [
+        "/assets/projects/stockpredict.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/ds789"
+      ]
+    }
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "health-1",
+    "title": "Smart Health Monitoring Band",
+    "domain": "Healthcare AI",
+    "level": "Intermediate",
+    "stack": ["Arduino Nano", "MAX30100", "Bluetooth"],
+    "blurb": "Wearable device for continuous heart rate, SpO2, and temperature monitoring.",
+    "details": {
+      "how": "Sensors record vitals, transmit via Bluetooth, and alert if anomalies are detected.",
+      "tech": "MAX30100 sensor, HC-05 Bluetooth, Android App",
+      "features": [
+        "SOS alert",
+        "Health anomaly detection",
+        "Cloud data logging"
+      ],
+      "code": [
+        "https://github.com/example/health-band"
+      ],
+      "images": [
+        "/assets/projects/healthband.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/med567"
+      ]
+    }
+  }
+]

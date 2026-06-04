@@ -1,0 +1,27 @@
+[
+  {
+    "id": "embed-1",
+    "title": "Digital Door Lock System",
+    "domain": "Embedded Systems",
+    "level": "Beginner",
+    "stack": ["Arduino", "Keypad", "Servo Motor", "LCD"],
+    "blurb": "Password-protected digital door lock with keypad and LCD display.",
+    "details": {
+      "how": "User enters password via keypad, if correct the servo unlocks the door.",
+      "tech": "Arduino Uno, Keypad, Servo motor, 16x2 LCD",
+      "features": [
+        "Customizable password",
+        "Secure access"
+      ],
+      "code": [
+        "https://github.com/example/digital-doorlock"
+      ],
+      "images": [
+        "/assets/projects/doorlock.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/embed123"
+      ]
+    }
+  }
+]

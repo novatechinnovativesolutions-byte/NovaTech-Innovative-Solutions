@@ -1,0 +1,28 @@
+[
+  {
+    "id": "cloud-1",
+    "title": "Cloud File Storage System",
+    "domain": "Cloud",
+    "level": "Advanced",
+    "stack": ["AWS S3", "Node.js", "React"],
+    "blurb": "Secure cloud-based file upload & sharing system.",
+    "details": {
+      "how": "Users upload/download files stored securely in AWS S3 with JWT authentication.",
+      "tech": "AWS S3, Node.js, React, MongoDB",
+      "features": [
+        "File upload & download",
+        "Role-based access",
+        "Secure authentication"
+      ],
+      "code": [
+        "https://github.com/example/cloud-storage"
+      ],
+      "images": [
+        "/assets/projects/cloudstorage.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/cloud654"
+      ]
+    }
+  }
+]

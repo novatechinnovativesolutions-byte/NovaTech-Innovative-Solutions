@@ -1,0 +1,28 @@
+[
+  {
+    "id": "web-1",
+    "title": "E-Learning Platform",
+    "domain": "Web Dev",
+    "level": "Intermediate",
+    "stack": ["React", "Node.js", "MongoDB", "Express"],
+    "blurb": "An online platform for courses, quizzes, and live classes.",
+    "details": {
+      "how": "MERN stack-based platform with authentication, video lectures, and student dashboard.",
+      "tech": "React, Node.js, MongoDB, Express, JWT",
+      "features": [
+        "User authentication",
+        "Video streaming",
+        "Quizzes & Leaderboard"
+      ],
+      "code": [
+        "https://github.com/example/elearning-platform"
+      ],
+      "images": [
+        "/assets/projects/elearning.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/web123"
+      ]
+    }
+  }
+]

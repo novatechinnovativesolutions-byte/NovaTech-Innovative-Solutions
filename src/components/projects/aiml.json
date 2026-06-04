@@ -1,0 +1,28 @@
+[
+  {
+    "id": "aiml-1",
+    "title": "AI Chatbot for College Helpdesk",
+    "domain": "AI/ML",
+    "level": "Intermediate",
+    "stack": ["Python", "TensorFlow", "NLTK", "Flask"],
+    "blurb": "Chatbot to answer student queries about courses, exams, and events.",
+    "details": {
+      "how": "Uses NLP + intent classification model to fetch answers from a college FAQ database.",
+      "tech": "TensorFlow, Flask, SQLite",
+      "features": [
+        "24/7 query handling",
+        "Multi-language support",
+        "Works with both voice & text"
+      ],
+      "code": [
+        "https://github.com/example/college-chatbot"
+      ],
+      "images": [
+        "/assets/projects/chatbot.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/ai1234"
+      ]
+    }
+  }
+]

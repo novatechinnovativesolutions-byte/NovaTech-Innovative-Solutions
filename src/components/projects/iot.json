@@ -1,0 +1,243 @@
+[
+  {
+    "id": "iot-1",
+    "title": "IoT-based Anti-theft Flooring System",
+    "domain": "IoT",
+    "level": "Intermediate",
+    "stack": ["Raspberry Pi", "ESP32", "Pressure Sensors", "MQTT", "Blynk"],
+    "blurb": "Smart floor with hidden pressure sensors to detect intruders and send alerts via IoT.",
+    "details": {
+      "how": "Pressure sensors under floor tiles detect unusual footsteps. Data is sent to ESP32 or Raspberry Pi, which checks thresholds and triggers alarms. The system sends real-time alerts to a mobile app or Node-RED dashboard using MQTT/Blynk.",
+      "tech": "ESP32 or Raspberry Pi, Pressure Sensors (FSR/Load Cell), MQTT broker, Blynk App or Node-RED dashboard, Arduino IDE/Python",
+      "features": [
+        "Real-time intrusion detection",
+        "Mobile alerts and notifications",
+        "Customizable sensitivity (ignores pets/small objects)",
+        "Scalable – multiple floor sensors in different rooms",
+        "Can connect with sirens, cameras, or smart locks"
+      ],
+      "components": [
+        "ESP32 / Raspberry Pi board",
+        "Force Sensitive Resistors (FSR) or load cell sensors",
+        "Relay module (for buzzer/alarm)",
+        "Buzzer or siren",
+        "Resistors, jumper wires, breadboard",
+        "Power supply (5V USB adapter or battery)",
+        "Optional: Camera module for Raspberry Pi"
+      ]
+    }
+  },
+  {
+    "id": "iot-2",
+    "title": "IoT Virtual Doctor Robot",
+    "domain": "IoT & Robotics",
+    "level": "Intermediate",
+    "stack": ["Raspberry Pi", "ESP32-CAM", "Sensors", "MQTT", "Flask"],
+    "blurb": "A telemedicine robot with health sensors and live video streaming for remote consultation.",
+    "details": {
+      "how": "The robot is equipped with ESP32-CAM for video streaming and sensors (temperature, heart rate, SpO2). Data is transmitted to a cloud server or mobile app. Doctors can remotely monitor and interact with patients via dashboard.",
+      "tech": "ESP32-CAM, Raspberry Pi, MQTT, Flask/Django backend, Blynk/Node-RED dashboard",
+      "features": [
+        "Live video consultation",
+        "Remote health monitoring",
+        "Portable and easy to deploy",
+        "Real-time patient data sharing",
+        "Alerts for abnormal readings"
+      ],
+      "components": [
+        "ESP32-CAM module",
+        "Raspberry Pi board",
+        "Heart rate sensor (MAX30100/30102)",
+        "Temperature sensor (DS18B20)",
+        "SpO2 sensor",
+        "DC motors + motor driver",
+        "Power supply",
+        "Chassis with wheels"
+      ]
+    }
+  },
+  {
+    "id": "iot-3",
+    "title": "IoT Contactless Doorbell",
+    "domain": "IoT",
+    "level": "Beginner",
+    "stack": ["Raspberry Pi", "PIR Sensor", "Blynk", "MQTT"],
+    "blurb": "A touch-free smart doorbell using motion sensors and IoT notifications.",
+    "details": {
+      "how": "A PIR motion sensor detects presence near the door. Instead of pressing a button, the detection triggers a doorbell sound and sends an IoT notification to the homeowner’s phone.",
+      "tech": "Raspberry Pi/ESP32, PIR motion sensor, MQTT broker, Blynk/IFTTT integration",
+      "features": [
+        "Completely touch-free operation",
+        "Mobile alerts when someone is at the door",
+        "Integration with cameras for visitor snapshots",
+        "Works even during COVID/health safety conditions"
+      ],
+      "components": [
+        "Raspberry Pi / ESP32",
+        "PIR motion sensor",
+        "Buzzer or speaker",
+        "Relay module",
+        "Power supply (5V adapter)",
+        "Wi-Fi connectivity"
+      ]
+    }
+  },
+  {
+    "id": "iot-4",
+    "title": "IoT Smart Parking System",
+    "domain": "IoT",
+    "level": "Intermediate",
+    "stack": ["ESP8266", "Ultrasonic Sensors", "MQTT", "Node-RED"],
+    "blurb": "Smart parking management using IoT sensors for real-time slot availability.",
+    "details": {
+      "how": "Ultrasonic sensors detect vehicle presence in each slot. Data is uploaded to a cloud dashboard via MQTT. Users can check available parking slots on a mobile app.",
+      "tech": "ESP8266/ESP32, Ultrasonic sensors, MQTT, Node-RED/Blynk",
+      "features": [
+        "Real-time slot monitoring",
+        "Mobile app-based parking guidance",
+        "Avoids congestion and saves time",
+        "Scalable for malls and offices"
+      ],
+      "components": [
+        "ESP8266/ESP32 board",
+        "Ultrasonic sensors",
+        "LED indicators (slot free/occupied)",
+        "Wi-Fi module",
+        "Power supply",
+        "Cloud dashboard"
+      ]
+    }
+  },
+  {
+    "id": "iot-5",
+    "title": "IoT Weather Reporting System",
+    "domain": "IoT",
+    "level": "Intermediate",
+    "stack": ["ESP32", "DHT11/22", "BMP180", "MQTT", "ThingSpeak"],
+    "blurb": "A real-time IoT-based weather monitoring system with temperature, humidity, and pressure data.",
+    "details": {
+      "how": "Sensors measure environmental parameters like temperature, humidity, and pressure. ESP32 uploads data to ThingSpeak/Node-RED dashboards for visualization and alerts.",
+      "tech": "ESP32, DHT11/22 sensor, BMP180/BME280 sensor, MQTT, ThingSpeak",
+      "features": [
+        "Real-time weather monitoring",
+        "Historical data logging",
+        "Mobile dashboard",
+        "Can integrate with irrigation/fan systems"
+      ],
+      "components": [
+        "ESP32 board",
+        "DHT11 or DHT22 sensor",
+        "BMP180/BME280 sensor",
+        "Wi-Fi module",
+        "Power supply",
+        "ThingSpeak cloud account"
+      ]
+    }
+  },
+  {
+    "id": "iot-6",
+    "title": "IoT Water Level Monitoring System",
+    "domain": "IoT",
+    "level": "Beginner",
+    "stack": ["ESP8266", "Ultrasonic Sensor", "Blynk"],
+    "blurb": "Monitors water levels in tanks and sends alerts when full/empty.",
+    "details": {
+      "how": "An ultrasonic sensor measures water level in a tank. ESP8266 uploads data to Blynk app, which notifies users if the tank is full or empty.",
+      "tech": "ESP8266, Ultrasonic sensor, Blynk app, Arduino IDE",
+      "features": [
+        "Tank water level monitoring",
+        "Overflow and dry-run alerts",
+        "Mobile notifications",
+        "Can trigger motor ON/OFF automatically"
+      ],
+      "components": [
+        "ESP8266 board",
+        "Ultrasonic sensor",
+        "Relay module",
+        "Submersible pump (optional)",
+        "Power supply",
+        "Jumper wires, resistors"
+      ]
+    }
+  },
+  {
+    "id": "iot-7",
+    "title": "IoT-based Home Automation",
+    "domain": "IoT",
+    "level": "Intermediate",
+    "stack": ["ESP32", "Relay Module", "Blynk", "MQTT"],
+    "blurb": "Control home appliances remotely using IoT and voice assistants.",
+    "details": {
+      "how": "Appliances are connected via relay modules controlled by ESP32. Mobile apps or voice assistants like Alexa/Google Home can switch devices ON/OFF through IoT platforms.",
+      "tech": "ESP32, Relay module, Blynk app, MQTT broker, Google Assistant/Alexa integration",
+      "features": [
+        "Remote appliance control",
+        "Voice command integration",
+        "Scheduling ON/OFF timers",
+        "Energy-efficient smart home setup"
+      ],
+      "components": [
+        "ESP32 board",
+        "Relay modules",
+        "Wi-Fi connectivity",
+        "Mobile app (Blynk/IFTTT)",
+        "Power supply",
+        "Smart speaker (optional)"
+      ]
+    }
+  },
+  {
+    "id": "iot-8",
+    "title": "IoT Smart Agriculture Monitoring System",
+    "domain": "IoT",
+    "level": "Intermediate",
+    "stack": ["ESP32", "Soil Moisture Sensor", "DHT11", "Node-RED", "MQTT"],
+    "blurb": "Monitors soil, humidity, and temperature for smart agriculture applications.",
+    "details": {
+      "how": "Sensors collect soil moisture, temperature, and humidity data. ESP32 sends it to Node-RED dashboard via MQTT. Automated irrigation and alerts help farmers improve productivity.",
+      "tech": "ESP32, Soil moisture sensor, DHT11 sensor, MQTT, Node-RED/Blynk",
+      "features": [
+        "Real-time soil & climate monitoring",
+        "Automated irrigation control",
+        "Mobile notifications",
+        "Improves crop yield and saves water"
+      ],
+      "components": [
+        "ESP32 board",
+        "Soil moisture sensor",
+        "DHT11/DHT22 sensor",
+        "Relay + water pump",
+        "Wi-Fi connectivity",
+        "Dashboard platform"
+      ]
+    }
+  },
+  {
+    "id": "iot-9",
+    "title": "Women Safety Night Patrolling IoT Robot",
+    "domain": "IoT & Robotics",
+    "level": "Advanced",
+    "stack": ["Raspberry Pi", "ESP32-CAM", "GPS", "GSM", "Node-RED"],
+    "blurb": "An IoT-enabled patrolling robot for women’s safety with live video, GPS tracking, and SOS alerts.",
+    "details": {
+      "how": "The robot is equipped with ESP32-CAM for surveillance, GPS for tracking, and GSM for SOS alerts. Controlled via IoT dashboard, it patrols predefined areas and sends live updates.",
+      "tech": "Raspberry Pi, ESP32-CAM, GPS module, GSM module, Node-RED dashboard",
+      "features": [
+        "Night patrolling with live video",
+        "GPS tracking of robot location",
+        "SOS button to alert authorities",
+        "IoT-controlled navigation",
+        "Can integrate with police monitoring systems"
+      ],
+      "components": [
+        "Raspberry Pi board",
+        "ESP32-CAM",
+        "GPS module",
+        "GSM module",
+        "DC motors + motor driver",
+        "Batteries and chassis",
+        "Blynk/Node-RED dashboard"
+      ]
+    }
+  }
+]

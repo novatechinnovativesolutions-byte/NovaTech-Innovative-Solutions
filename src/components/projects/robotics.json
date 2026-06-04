@@ -1,0 +1,27 @@
+[
+  {
+    "id": "robotics-1",
+    "title": "Line Following Robot",
+    "domain": "Robotics",
+    "level": "Beginner",
+    "stack": ["Arduino", "IR Sensors", "L298N Motor Driver"],
+    "blurb": "A simple robot that follows a line using IR sensors.",
+    "details": {
+      "how": "IR sensors detect black line, Arduino controls motor direction using L298N driver.",
+      "tech": "Arduino Uno, IR sensor array, L298N driver",
+      "features": [
+        "Autonomous navigation",
+        "Obstacle avoidance (optional)"
+      ],
+      "code": [
+        "https://github.com/example/line-following-robot"
+      ],
+      "images": [
+        "/assets/projects/linerobot.png"
+      ],
+      "videos": [
+        "https://www.youtube.com/embed/robot456"
+      ]
+    }
+  }
+]
