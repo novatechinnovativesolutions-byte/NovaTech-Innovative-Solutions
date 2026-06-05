@@ -81,13 +81,13 @@ const ALL_PRODUCTS = [
 /* ── Training images ── */
 const TRAINING_SESSIONS = [
   {
-    img: "img/surtech.jpg",
+    img: "/img/surtech.jpg",
     alt: "IoT training workshop at engineering college — students working with NodeMCU and sensors",
     label: "IoT & ES BCT - Beyond Curriculum Training",
     uni: "Engineering College, West Bengal",
   },
   {
-    img: "img/jisce.png",
+    img: "/img/jisce.png",
     alt: "Embedded systems training session — hands-on Arduino and microcontroller lab",
     label: "VLSI BCT - Beyond Curriculum Training",
     uni: "Engineering College, West Bengal",
@@ -485,9 +485,10 @@ const About = () => {
           position: relative;
           aspect-ratio: 16/9;
           border: 1px solid var(--nt-border);
-          opacity: 0;
           transform: translateY(24px);
           transition: transform .3s ease, box-shadow .3s ease;
+          transform: translateZ(24px);
+
         }
         .nta-train-card.nta-show { animation: nta-up .5s ease forwards; }
         .nta-train-card:hover {
@@ -737,7 +738,7 @@ const About = () => {
                 loading="eager"
               />
               <div className="nta-hero-badge">
-                🏆 <span>Top-Rated</span> by 300+ Students & Startups
+                🏆 <span>Top-Rated</span> by 200+ Students & Startups
               </div>
             </div>
           </div>
@@ -856,8 +857,8 @@ const About = () => {
                 Hands-On Learning <span className="nta-accent">Across Universities</span>
               </h2>
               <p className="nta-lead">
-                We've conducted IoT, Embedded Systems, and AI/ML workshops at 20+ engineering
-                colleges and polytechnic institutes across West Bengal and beyond. Our practical,
+                We've conducted IoT, Embedded Systems, and AI/ML workshops at multiplr engineering
+                colleges across West Bengal and beyond. Our practical,
                 project-based training gives students real industry experience.
               </p>
             </div>

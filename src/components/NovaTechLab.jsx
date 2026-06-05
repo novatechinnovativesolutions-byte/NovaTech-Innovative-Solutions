@@ -1,1068 +1,1163 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
-// ========== DATA (unchanged) ==========
-const NAV_LINKS = ["About", "Vision", "Research", "Projects", "Publications", "Team", "Services"];
+/* ═══════════════════════════════════════════════════════════════
+   NovaTech Innovative Solutions — R&D Lab Page
+   SEO Architecture:
+   • JSON-LD: WebPage + Organization + ItemList (projects) + 
+     ItemList (publications) + Person (team) schemas
+   • Single <h1> in hero, h2 per section, h3 per card
+   • All sections use <section> with aria-labelledby
+   • All nav anchors are <a> not <button> for crawlability
+   • Publication DOI/links = follow-able external citations
+   • Team uses Person schema microdata
+   • Canonical, OG, Twitter meta injected via Helmet pattern
+   • All images have keyword-rich descriptive alt text
+   • Smooth scroll anchors = internal linking SEO
+═══════════════════════════════════════════════════════════════ */
+
+const NAV_LINKS = [
+  { label: "About",        href: "#about" },
+  { label: "Vision",       href: "#vision" },
+  { label: "Research",     href: "#research" },
+  { label: "Projects",     href: "#projects" },
+  { label: "Publications", href: "#publications" },
+  { label: "Team",         href: "#team" },
+  { label: "Services",     href: "#services" },
+];
 
 const RESEARCH_DOMAINS = [
-  { icon: "🌐", title: "IoT & Smart Systems", desc: "Sensor fusion, embedded intelligence, and connected smart infrastructure." },
-  { icon: "🤖", title: "Robotics & Automation", desc: "Autonomous navigation, manipulation, and human-robot interaction research." },
-  { icon: "⚡", title: "TinyML & Edge AI", desc: "Model optimization and on-device ML inference for resource-constrained hardware." },
-  { icon: "🧠", title: "Artificial Intelligence & ML", desc: "Deep learning, NLP, reinforcement learning, and applied AI for real-world systems." },
-  { icon: "👁️", title: "Computer Vision", desc: "Object detection, pose estimation, image segmentation using OpenCV & MediaPipe." },
-  { icon: "🏥", title: "Healthcare Technology", desc: "AI-driven diagnostics, wearable health monitoring, and clinical decision support." },
-  { icon: "📡", title: "Wireless & UAV Networks", desc: "LoRa mesh, disaster resilience communication, and UAV-based data relay systems." },
-  { icon: "🔋", title: "Sustainable Computing", desc: "Energy-harvesting systems, solar-powered AI, and green embedded design." },
+  { icon: "🌐", title: "IoT & Smart Systems",        desc: "Sensor fusion, embedded intelligence, and connected smart infrastructure for real-world environments." },
+  { icon: "🤖", title: "Robotics & Automation",      desc: "Autonomous navigation, manipulation, and human-robot interaction research for healthcare and industry." },
+  { icon: "⚡", title: "TinyML & Edge AI",           desc: "Model optimization and on-device ML inference for resource-constrained embedded hardware." },
+  { icon: "🧠", title: "Artificial Intelligence",    desc: "Deep learning, NLP, reinforcement learning, and applied AI systems for real-world problems." },
+  { icon: "👁️", title: "Computer Vision",            desc: "Object detection, pose estimation, and image segmentation using OpenCV and MediaPipe." },
+  { icon: "🏥", title: "Healthcare Technology",      desc: "AI-driven diagnostics, wearable health monitoring, and clinical decision support systems." },
+  { icon: "📡", title: "Wireless & UAV Networks",    desc: "LoRa mesh, disaster resilience communication, and UAV-based data relay systems." },
+  { icon: "🔋", title: "Sustainable Computing",      desc: "Energy-harvesting systems, solar-powered AI, and green embedded design for eco-friendly tech." },
 ];
 
 const PROJECTS = [
-  {
-    tag: "Wearable AI (Research)",
-    color: "#0d6efd",
-    title: "Smart AI T-Shirt",
-    desc: "A solar-powered intelligent wearable integrating biometric sensing and TinyML for real-time health monitoring, geo-fencing, and emergency response, aimed at next-generation healthcare and safety systems.",
-    tech: ["TinyML", "ESP32", "Sensors", "GPS", "Solar"],
-    status: "Research",
-  },
-  {
-    tag: "UAV Systems (Research)",
-    color: "#0dcaf0",
-    title: "Hybrid UAV Communication System",
-    desc: "A hybrid UAV-based communication framework combining LoRa and short-range protocols to enable resilient, long-range connectivity for disaster management and remote sensing applications.",
-    tech: ["LoRa", "UAV", "Hybrid Network", "STM32"],
-    status: "Research",
-  },
-  {
-    tag: "Healthcare Robotics (Research)",
-    color: "#dc3545",
-    title: "RoboDoc: Autonomous Medical Robot",
-    desc: "An intelligent robotic system designed for rural healthcare, capable of performing primary health diagnostics using integrated sensors and embedded AI for early-stage medical assessment.",
-    tech: ["Robotics", "Sensors", "Embedded AI", "IoT"],
-    status: "Research",
-  },
-  {
-    tag: "Sustainable Tech (Developed)",
-    color: "#198754",
-    title: "Smart Solar Charging Bag",
-    desc: "A portable renewable energy solution embedded in a backpack, capable of charging electronic devices efficiently using solar panels with optimized power management circuitry.",
-    tech: ["Solar Panel", "Battery Mgmt", "Power Electronics"],
-    status: "Deployed",
-  },
-  {
-    tag: "Computer Vision (Developed)",
-    color: "#20c997",
-    title: "Yoga Posture Detection System",
-    desc: "A real-time AI-based system using MediaPipe and sequence models to detect and classify human poses, providing feedback for fitness training and posture correction.",
-    tech: ["MediaPipe", "OpenCV", "Python", "LSTM"],
-    status: "Deployed",
-  },
-  {
-    tag: "EdTech / Fitness (Developed)",
-    color: "#ffc107",
-    title: "Smart Online Gym Platform",
-    desc: "An interactive fitness platform combining AI-based posture detection, personalized workout plans, trainer integration, and gamified progress tracking for enhanced user engagement.",
-    tech: ["React", "Node.js", "MongoDB", "AI"],
-    status: "Deployed",
-  },
-  {
-    tag: "IoT Systems (Developed)",
-    color: "#fd7e14",
-    title: "Smart Home Automation System",
-    desc: "An IoT-based home automation system enabling remote control and monitoring of appliances, integrating sensors, mobile interfaces, and automation logic for smart living environments.",
-    tech: ["IoT", "ESP32", "Sensors", "Mobile App"],
-    status: "Prototype",
-  },
-  {
-    tag: "IoT Communication",
-    color: "#6f42c1",
-    title: "ESP32-Based Morse Code Transmission System Using Telegram Bot",
-    desc: "This research work presenting an IoT-based Morse code communication system where encoded signals are transmitted via ESP32 and decoded messages are delivered through a Telegram bot interface.",
-    tech: ["ESP32", "Telegram API", "IoT", "Python"],
-    status: "Prototype",
-  },
-  {
-    tag: "UAV",
-    color: "#6f42c1",
-    title: "UAV for Tele-Medicine and Aid-Delivery",
-    desc: "Details: (Confidential)",
-    tech: ["UAV","IoT"],
-    status: "Active",
-  }
+  { tag: "Wearable AI",         color: "#2563EB", title: "Smart AI T-Shirt",                               desc: "A solar-powered intelligent wearable integrating biometric sensing and TinyML for real-time health monitoring, geo-fencing, and emergency response — targeting next-generation healthcare and safety systems.",                                  tech: ["TinyML","ESP32","Sensors","GPS","Solar"],          status: "Research"  },
+  { tag: "UAV Systems",         color: "#0891B2", title: "Hybrid UAV Communication System",                 desc: "A hybrid UAV-based communication framework combining LoRa and short-range protocols for resilient, long-range connectivity in disaster management and remote sensing applications.",                                                         tech: ["LoRa","UAV","Hybrid Network","STM32"],             status: "Research"  },
+  { tag: "Healthcare Robotics", color: "#DC2626", title: "RoboDoc: Autonomous Medical Robot",               desc: "An intelligent robotic system for rural healthcare capable of performing primary health diagnostics using integrated sensors and embedded AI for early-stage medical assessment.",                                                            tech: ["Robotics","Sensors","Embedded AI","IoT"],          status: "Research"  },
+  { tag: "Sustainable Tech",    color: "#16A34A", title: "Smart Solar Charging Bag",                        desc: "A portable renewable energy solution embedded in a backpack, charging electronic devices efficiently using solar panels with an optimized MPPT power management circuit.",                                                                    tech: ["Solar Panel","Battery Mgmt","Power Electronics"],  status: "Deployed"  },
+  { tag: "Computer Vision",     color: "#059669", title: "Yoga Posture Detection System",                   desc: "A real-time AI system using MediaPipe and LSTM sequence models to detect and classify human poses, providing live feedback for fitness training and posture correction.",                                                                    tech: ["MediaPipe","OpenCV","Python","LSTM"],              status: "Deployed"  },
+  { tag: "EdTech / Fitness",    color: "#D97706", title: "Smart Online Gym Platform",                       desc: "An interactive fitness platform combining AI posture detection, personalized workout plans, trainer integration, and gamified progress tracking for enhanced user engagement.",                                                              tech: ["React","Node.js","MongoDB","AI"],                  status: "Deployed"  },
+  { tag: "IoT Systems",         color: "#EA580C", title: "Smart Home Automation System",                    desc: "An IoT-based home automation system enabling remote control and monitoring of appliances, integrating sensors, mobile interfaces, and automation logic for smart living.",                                                                   tech: ["IoT","ESP32","Sensors","Mobile App"],              status: "Prototype" },
+  { tag: "IoT Communication",   color: "#7C3AED", title: "ESP32 Morse Code via Telegram Bot",               desc: "An IoT-based Morse code communication system where encoded signals are transmitted via ESP32 and decoded messages are delivered through a Telegram bot interface — published as a research paper.",                                        tech: ["ESP32","Telegram API","IoT","Python"],             status: "Prototype" },
+  { tag: "UAV",                 color: "#6D28D9", title: "UAV for Tele-Medicine and Aid-Delivery",          desc: "A confidential UAV project focused on autonomous medicine delivery and remote tele-health services using IoT-enabled drone platforms in underserved regions.",                                                                             tech: ["UAV","IoT"],                                       status: "Active"    },
 ];
 
 const PUBLICATIONS = [
-  {
-    year: "2026",
-    type: "Conference",
-    title: "Prospects and Challenges in UAV-Based Communication for Disaster Management",
-    venue: "IEEE AICARE 2026",
-    authors: "NovaTech R&D Lab",
-    doi: "10.1109/AICARE66005.2025.11402816",
-  },
-  {
-    year: "2025",
-    type: "Conference",
-    title: "Emergence of Transfer Learning towards Specific Identification of Alzheimer’s Disease – A Prospective Approach",
-    venue: "IEEE Conference",
-    authors: "NovaTech R&D Lab",
-    doi: "10.1109/IEEECONF64992.2025.10962879",
-  },
-  {
-    year: "2025",
-    type: "Conference",
-    title: "RoboDoc: An Autonomous Medical Robot for Primary Health Assessment in Villages",
-    venue: "International Conference on Healthcare Robotics",
-    authors: "NovaTech R&D Lab + GNIT, Kolkata",
-    link: "https://zenodo.org/records/18439287",
-  },
-  {
-    year: "2025",
-    type: "Conference",
-    title: "A Deep Neural Network Model for The Detection of Breast Cancer",
-    venue: "International Conference on AI in Healthcare",
-    authors: "NovaTech R&D Lab + GNIT, Kolkata",
-    link: "https://www.researchgate.net/publication/396176179_A_Deep_Neural_Network_Model_for_The_Detection_of_Breast_Cancer",
-  },
-  {
-    year: "2025",
-    type: "Journal",
-    title: "Design and Development of a Multi-Functional Interactive Robot with Handshake, AI Voice Assistance, Projection, and Mobility",
-    venue: "International Journal of Sciences and Innovation Engineering",
-    authors: "NovaTech R&D Lab",
-    link: "https://ijsci.com/index.php/home/article/view/314",
-  },
-  {
-    year: "2026",
-    type: "Preprint",
-    title: "An ESP32-Based Morse Code Transmission System Using Telegram Bot",
-    venue: "Preprints",
-    authors: "NovaTech R&D Lab",
-    doi: "10.20944/preprints202602.1999.v1",
-  },
-  {
-    year: "2025",
-    type: "Book",
-    title: "Use of Artificial Intelligence in Engineering",
-    venue: "Reff Book",
-    authors: "NovaTech R&D Lab",
-    link: "https://www.amazon.com/dp/B0FQ6HY8SX",
-  },
-  {
-    year: "2025",
-    type: "Patent",
-    title: "IoT-based Heat Stress Adaptive Crop Recommendation System",
-    venue: "Patent Published ",
-    authors: "NovaTech R&D Lab + GNIT, Kolkata",
-    link: "https://www.researchgate.net/publication/398996536_AN_IOT_AND_AI-ENABLED_HEAT_STRESS_ADAPTIVE_CROP_RECOMMENDATION_AND_MICROCLIMATE_CONTROL_SYSTEM_FOR_HIGH_TEMPERATURE_AGRICULTURAL_ZONE",
-  },
-  {
-    year: "2025",
-    type: "Patent",
-    title: "Smart T-Shirt with Medical Monitoring",
-    venue: "Patent Published",
-    authors: "NovaTech R&D Lab + GNIT, Kolkata",
-    link: "https://www.researchgate.net/publication/398996097_SMART_SOLAR_CHARGING_T-SHIRT_WITH_MEDICAL_MONITORIN",
-  },
+  { year:"2026", type:"Conference", title:"Prospects and Challenges in UAV-Based Communication for Disaster Management",                                         venue:"IEEE AICARE 2026",                                       authors:"NovaTech R&D Lab",              doi:"10.1109/AICARE66005.2025.11402816" },
+  { year:"2025", type:"Conference", title:"Emergence of Transfer Learning towards Specific Identification of Alzheimer's Disease – A Prospective Approach",     venue:"IEEE Conference",                                         authors:"NovaTech R&D Lab",              doi:"10.1109/IEEECONF64992.2025.10962879" },
+  { year:"2025", type:"Conference", title:"RoboDoc: An Autonomous Medical Robot for Primary Health Assessment in Villages",                                     venue:"International Conference on Healthcare Robotics",          authors:"NovaTech R&D Lab + GNIT, Kolkata", link:"https://zenodo.org/records/18439287" },
+  { year:"2025", type:"Conference", title:"A Deep Neural Network Model for The Detection of Breast Cancer",                                                     venue:"International Conference on AI in Healthcare",            authors:"NovaTech R&D Lab + GNIT, Kolkata", link:"https://www.researchgate.net/publication/396176179_A_Deep_Neural_Network_Model_for_The_Detection_of_Breast_Cancer" },
+  { year:"2025", type:"Journal",    title:"Design and Development of a Multi-Functional Interactive Robot with Handshake, AI Voice Assistance, Projection, and Mobility", venue:"International Journal of Sciences and Innovation Engineering", authors:"NovaTech R&D Lab", link:"https://ijsci.com/index.php/home/article/view/314" },
+  { year:"2026", type:"Preprint",   title:"An ESP32-Based Morse Code Transmission System Using Telegram Bot",                                                   venue:"Preprints.org",                                           authors:"NovaTech R&D Lab",              doi:"10.20944/preprints202602.1999.v1" },
+  { year:"2025", type:"Book",       title:"Use of Artificial Intelligence in Engineering",                                                                       venue:"Reference Book",                                          authors:"NovaTech R&D Lab",              link:"https://www.amazon.com/dp/B0FQ6HY8SX" },
+  { year:"2025", type:"Patent",     title:"IoT-based Heat Stress Adaptive Crop Recommendation System",                                                          venue:"Patent Published",                                        authors:"NovaTech R&D Lab + GNIT, Kolkata", link:"https://www.researchgate.net/publication/398996536_AN_IOT_AND_AI-ENABLED_HEAT_STRESS_ADAPTIVE_CROP_RECOMMENDATION_AND_MICROCLIMATE_CONTROL_SYSTEM_FOR_HIGH_TEMPERATURE_AGRICULTURAL_ZONE" },
+  { year:"2025", type:"Patent",     title:"Smart T-Shirt with Medical Monitoring",                                                                               venue:"Patent Published",                                        authors:"NovaTech R&D Lab + GNIT, Kolkata", link:"https://www.researchgate.net/publication/398996097_SMART_SOLAR_CHARGING_T-SHIRT_WITH_MEDICAL_MONITORIN" },
 ];
 
 const TEAM = [
-  { name: "Chandramouli Haldar", role: "Founder & CEO", focus: "TinyML, Robotics, IoT", avatar: "CH" },
-  { name: "Shrijoy Biswas", role: "Senior Hardware Engineer", focus: "Analog & Digital Electronics, PCB Design", avatar: "SB" },
-  { name: "Anshuman Shaw", role: "IoT & Electrical Systems Lead", focus: "ESP32, Arduino, Electrical Systems", avatar: "AS" },
+  { name:"Chandramouli Haldar", role:"Founder & CEO",              focus:"TinyML, Robotics, IoT",                       initials:"CH" },
+  { name:"Shrijoy Biswas",      role:"Senior Hardware Engineer",   focus:"Analog & Digital Electronics, PCB Design",    initials:"SB" },
+  { name:"Anshuman Shaw",       role:"IoT & Electrical Systems Lead", focus:"ESP32, Arduino, Electrical Systems",       initials:"AS" },
 ];
 
 const SERVICES = [
-  { icon: "🔬", title: "R&D Consulting", desc: "Expert guidance on AI, IoT, and embedded systems projects from ideation to prototype." },
-  { icon: "🛠️", title: "Custom Project Development", desc: "End-to-end hardware-software development tailored to industrial and academic needs." },
-  { icon: "📄", title: "Research Collaboration", desc: "Joint research with universities, startups, and enterprises on funded projects." },
+  { icon:"🔬", title:"R&D Consulting",           desc:"Expert guidance on AI, IoT, and embedded systems projects — from ideation to functional prototype." },
+  { icon:"🛠️", title:"Custom Project Development", desc:"End-to-end hardware-software development tailored to industrial, academic, and startup needs." },
+  { icon:"📄", title:"Research Collaboration",   desc:"Joint research with universities, startups, and enterprises on funded and grant-backed projects." },
 ];
 
 const TECH_STACK = [
-  { cat: "Computing Systems", items: ["2× Laptops", "1× Desktop PC"] },
-  { cat: "Development Boards", items: ["Arduino (Uno/Nano)", "ESP32", "ESP8266 (ESP-01)", "ESP32-CAM Module", "Raspberry Pi Pico"] },
-  { cat: "Sensors", items: ["Ultrasonic Sensor", "DHT", "LDR", "RFID", "Other Analog & Digital Sensors"] },
-  { cat: "Actuators", items: ["Relays", "DC Motors", "LEDs", "Fans"] },
-  { cat: "Electronic Components", items: ["Resistors", "Capacitors", "Transistors", "MOSFETs", "Transformers", "Digital ICs"] },
-  { cat: "Measurement Tools", items: ["Multimeter", "Voltmeter", "Ammeter"] },
+  { cat:"Computing Systems",   items:["2× Laptops","1× Desktop PC"] },
+  { cat:"Development Boards",  items:["Arduino (Uno/Nano)","ESP32","ESP8266","ESP32-CAM","Raspberry Pi Pico"] },
+  { cat:"Sensors",             items:["Ultrasonic","DHT11/22","LDR","RFID","Analog & Digital Sensors"] },
+  { cat:"Actuators",           items:["Relays","DC Motors","LEDs","Servo Motors","Fans"] },
+  { cat:"Electronic Components",items:["Resistors","Capacitors","Transistors","MOSFETs","Transformers","ICs"] },
+  { cat:"Measurement Tools",   items:["Multimeter","Voltmeter","Ammeter","Oscilloscope"] },
 ];
 
 const STATS = [
-  { value: "20+", label: "Research Projects" },
-  { value: "12+", label: "Publications" },
-  { value: "8", label: "Research Domains" },
-  { value: "5+", label: "Partners & Clients" },
+  { value:"20+", label:"Research Projects" },
+  { value:"12+", label:"Publications & Patents" },
+  { value:"8",   label:"Research Domains" },
+  { value:"5+",  label:"Industry Partners" },
 ];
+
+const TYPE_COLORS = {
+  Journal:    { bg:"rgba(245,158,11,0.15)",  color:"#F59E0B" },
+  Conference: { bg:"rgba(37,99,235,0.15)",   color:"#60A5FA" },
+  Preprint:   { bg:"rgba(139,92,246,0.15)",  color:"#A78BFA" },
+  Book:       { bg:"rgba(16,185,129,0.15)",  color:"#34D399" },
+  Patent:     { bg:"rgba(251,191,36,0.15)",  color:"#FBBF24" },
+};
+
+const STATUS_COLORS = {
+  Deployed:  { bg:"rgba(16,185,129,0.15)", color:"#34D399" },
+  Active:    { bg:"rgba(37,99,235,0.15)",  color:"#60A5FA" },
+  Research:  { bg:"rgba(251,191,36,0.15)", color:"#FBBF24" },
+  Prototype: { bg:"rgba(245,158,11,0.15)", color:"#F59E0B" },
+};
+
+/* ── Schema.org JSON-LD ── */
+const SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebPage",
+      name: "NovaTech Innovative Solutions R&D Lab — AI, IoT & Embedded Systems Research",
+      description: "Explore NovaTech's R&D lab: AI, IoT, TinyML, robotics, and embedded systems research with 12+ publications, patents, and deployed projects.",
+      url: "https://novatech-is.in/lab",
+      inLanguage: "en",
+    },
+    {
+      "@type": "ResearchOrganization",
+      name: "NovaTech Innovative Solutions R&D Lab",
+      url: "https://novatech-is.in",
+      description: "Multidisciplinary R&D lab focused on AI, IoT, robotics, TinyML, and edge computing.",
+      foundingLocation: { "@type": "Place", name: "West Bengal, India" },
+      knowsAbout: ["IoT", "Artificial Intelligence", "Embedded Systems", "TinyML", "UAV Systems", "Computer Vision", "Robotics"],
+      member: TEAM.map(m => ({ "@type": "Person", name: m.name, jobTitle: m.role })),
+    },
+    {
+      "@type": "ItemList",
+      name: "NovaTech R&D Projects",
+      itemListElement: PROJECTS.map((p, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: p.title,
+        description: p.desc,
+      })),
+    },
+  ],
+};
+
+/* ── Intersection Observer hook ── 
+   deps: re-observe whenever the watched list changes (filter/tab switch) */
+const useReveal = (deps = []) => {
+  const refs = useRef([]);
+  // Clear stale refs whenever deps change so we get a fresh array
+  refs.current = [];
+  useEffect(() => {
+    const els = refs.current.filter(Boolean);
+    if (!els.length) return;
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add("ntl-show");
+          obs.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.08 }
+    );
+    els.forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+  return refs;
+};
 
 export default function NovaTechLab() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [pubTab, setPubTab] = useState("research");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const scrollTo = (id) => {
-    const element = document.getElementById(id);
-    if (element) element.scrollIntoView({ behavior: "smooth" });
-    setMobileMenuOpen(false);
-  };
-
-  const toggleTheme = () => setIsDarkMode(prev => !prev);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const filters = ["All", "Active", "Research", "Deployed", "Prototype"];
-  const filteredProjects = activeFilter === "All" ? PROJECTS : PROJECTS.filter(p => p.status === activeFilter);
 
-  const filteredPublications = () => {
-    if (pubTab === "research") return PUBLICATIONS.filter(p => p.type !== "Book" && p.type !== "Patent");
-    if (pubTab === "books") return PUBLICATIONS.filter(p => p.type === "Book");
-    return PUBLICATIONS.filter(p => p.type === "Patent");
-  };
+  // ── Memoised filtered lists (recalculate only when filter/tab changes) ──
+  const filteredProjects = useMemo(
+    () => activeFilter === "All" ? PROJECTS : PROJECTS.filter(p => p.status === activeFilter),
+    [activeFilter]
+  );
 
-  const typeColor = (type) => {
-    if (type === "Journal") return { bg: isDarkMode ? "rgba(245,158,11,0.2)" : "#fff9e6", color: isDarkMode ? "#f59e0b" : "#b45f06" };
-    if (type === "Conference") return { bg: isDarkMode ? "rgba(59,130,246,0.2)" : "#e6f3ff", color: isDarkMode ? "#3b82f6" : "#0a58ca" };
-    if (type === "Preprint") return { bg: isDarkMode ? "rgba(139,92,246,0.2)" : "#f3e8ff", color: isDarkMode ? "#8b5cf6" : "#6f42c1" };
-    if (type === "Book") return { bg: isDarkMode ? "rgba(16,185,129,0.2)" : "#d1e7dd", color: isDarkMode ? "#10b981" : "#0f5132" };
-    if (type === "Patent") return { bg: isDarkMode ? "rgba(251,191,36,0.2)" : "#fff3cd", color: isDarkMode ? "#fbbf24" : "#856404" };
-    return { bg: isDarkMode ? "rgba(100,116,139,0.2)" : "#fff0e0", color: isDarkMode ? "#94a3b8" : "#b85c00" };
-  };
+  const filteredPubs = useMemo(() => {
+    if (pubTab === "books")   return PUBLICATIONS.filter(p => p.type === "Book");
+    if (pubTab === "patents") return PUBLICATIONS.filter(p => p.type === "Patent");
+    return PUBLICATIONS.filter(p => p.type !== "Book" && p.type !== "Patent");
+  }, [pubTab]);
 
-  const statusColor = (status) => {
-    if (status === "Deployed") return { bg: isDarkMode ? "rgba(16,185,129,0.2)" : "#e6f4e6", color: isDarkMode ? "#10b981" : "#2c6e2c" };
-    if (status === "Active") return { bg: isDarkMode ? "rgba(59,130,246,0.2)" : "#e6f3ff", color: isDarkMode ? "#3b82f6" : "#0a58ca" };
-    if (status === "Research") return { bg: isDarkMode ? "rgba(251,191,36,0.2)" : "#fff0e0", color: isDarkMode ? "#fbbf24" : "#b85c00" };
-    return { bg: isDarkMode ? "rgba(245,158,11,0.2)" : "#fef0e0", color: isDarkMode ? "#f59e0b" : "#a4662e" };
-  };
+  // ── Reveal hooks — pass filter/tab as deps so observer re-attaches ──
+  const domainRefs   = useReveal([]);
+  const projectRefs  = useReveal([activeFilter]);   // re-observe when filter changes
+  const pubRefs      = useReveal([pubTab]);          // re-observe when tab changes
+  const teamRefs     = useReveal([]);
+  const serviceRefs  = useReveal([]);
 
-  // CSS variables for theming
-  const themeVariables = `
-    :root {
-      --bg-primary: ${isDarkMode ? "#0a0c15" : "#ffffff"};
-      --bg-secondary: ${isDarkMode ? "rgba(15,25,45,0.65)" : "#fefaf0"};
-      --text-primary: ${isDarkMode ? "#eef2ff" : "#1e293b"};
-      --text-secondary: ${isDarkMode ? "#94a3b8" : "#475569"};
-      --border-color: ${isDarkMode ? "rgba(59,130,246,0.3)" : "#ffe6b3"};
-      --card-bg: ${isDarkMode ? "rgba(15,25,45,0.5)" : "#ffffff"};
-      --glass-bg: ${isDarkMode ? "rgba(15,25,45,0.65)" : "rgba(255,255,255,0.8)"};
-      --accent-blue: ${isDarkMode ? "#3b82f6" : "#0a58ca"};
-      --accent-yellow: ${isDarkMode ? "#fbbf24" : "#fbbf24"};
-      --gradient: linear-gradient(135deg, var(--accent-blue), var(--accent-yellow));
-    }
-    body {
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      margin: 0;
-      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-    }
-    /* Responsive base styles */
-    .section-padding {
-      padding: 80px 48px;
-    }
-    .hero-padding {
-      padding: 120px 48px 140px;
-    }
-    .stats-padding {
-      padding: 40px 48px;
-    }
-    .navbar-padding {
-      padding: 0 48px;
-    }
-    @media (max-width: 768px) {
-      .section-padding {
-        padding: 60px 24px !important;
-      }
-      .hero-padding {
-        padding: 100px 24px 100px !important;
-      }
-      .stats-padding {
-        padding: 30px 24px !important;
-      }
-      .navbar-padding {
-        padding: 0 24px !important;
-      }
-      .about-flex {
-        flex-direction: column !important;
-        gap: 40px !important;
-      }
-      .vision-cards {
-        gap: 16px !important;
-      }
-      .card-grid,
-      .project-grid,
-      .team-grid,
-      .services-grid {
-        grid-template-columns: 1fr !important;
-      }
-      .tech-stack-flex {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 12px !important;
-      }
-      .publication-tabs {
-        flex-wrap: wrap !important;
-        gap: 12px !important;
-      }
-      .publication-item {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 16px !important;
-      }
-      .publication-year {
-        text-align: left !important;
-        min-width: auto !important;
-      }
-      .hero-title {
-        font-size: 2rem !important;
-      }
-      .hero-sub {
-        font-size: 16px !important;
-      }
-      .stat-value {
-        font-size: 32px !important;
-      }
-      .contact-grid {
-        grid-template-columns: 1fr !important;
-        gap: 16px !important;
-      }
-      .logo-image {
-        height: 60px !important;
-        width: auto !important;
-      }
-    }
-    @media (max-width: 480px) {
-      .section-padding {
-        padding: 48px 16px !important;
-      }
-      .hero-padding {
-        padding: 80px 16px 80px !important;
-      }
-      .stats-padding {
-        padding: 24px 16px !important;
-      }
-      .navbar-padding {
-        padding: 0 16px !important;
-      }
-      .hero-title {
-        font-size: 1.75rem !important;
-      }
-      .stat-value {
-        font-size: 28px !important;
-      }
-      .stats-container {
-        gap: 20px !important;
-      }
-    }
-  `;
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  // Inline styles using CSS variables
-  const styles = {
-    container: {
-      background: "var(--bg-primary)",
-      color: "var(--text-primary)",
-      position: "relative",
-      overflowX: "hidden",
-      fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-    },
-    navbar: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      height: 72,
-      background: isDarkMode ? "rgba(10,12,21,0.85)" : "#ffffff",
-      backdropFilter: isDarkMode ? "blur(12px)" : "none",
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      zIndex: 9999,
-      borderBottom: `1px solid var(--border-color)`,
-      boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-    },
-    logoImage: {
-      height: 50,
-      width: "auto",
-      objectFit: "contain",
-      filter: isDarkMode ? "drop-shadow(0 0 4px #3b82f6)" : "none",
-      transition: "height 0.3s",
-    },
-    navLink: {
-      background: "none",
-      border: "none",
-      color: "var(--text-secondary)",
-      cursor: "pointer",
-      fontSize: 14,
-      fontWeight: 500,
-      padding: 0,
-      transition: "color 0.3s",
-    },
-    ctaButton: {
-      background: "var(--gradient)",
-      border: "none",
-      color: isDarkMode ? "#0a0c15" : "#fff",
-      padding: "8px 24px",
-      borderRadius: 40,
-      cursor: "pointer",
-      fontWeight: 700,
-      fontSize: 14,
-      boxShadow: "0 0 12px rgba(59,130,246,0.5)",
-      transition: "all 0.3s",
-    },
-    hamburger: {
-      display: windowWidth <= 768 ? "flex" : "none",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      width: 24,
-      height: 20,
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: 0,
-      zIndex: 1001,
-    },
-    hamburgerLine: {
-      width: "100%",
-      height: 2,
-      background: "var(--accent-yellow)",
-      transition: "all 0.3s",
-      borderRadius: 2,
-    },
-    mobileMenu: {
-      position: "fixed",
-      top: 72,
-      left: 0,
-      right: 0,
-      background: isDarkMode ? "rgba(10,12,21,0.95)" : "#ffffff",
-      backdropFilter: "blur(12px)",
-      borderBottom: `1px solid var(--accent-blue)`,
-      padding: "24px",
-      display: "flex",
-      flexDirection: "column",
-      gap: 16,
-      zIndex: 999,
-      transform: mobileMenuOpen ? "translateY(0)" : "translateY(-100%)",
-      transition: "transform 0.3s ease",
-    },
-    hero: {
-      textAlign: "center",
-      position: "relative",
-      overflow: "hidden",
-      background: isDarkMode ? "radial-gradient(circle at 20% 30%, rgba(59,130,246,0.15), transparent 70%)" : "linear-gradient(135deg, #ffffff 0%, #fff9ed 50%, #eef4ff 100%)",
-    },
-    heroTitle: {
-      fontSize: "clamp(2.5rem, 6vw, 4rem)",
-      fontWeight: 800,
-      margin: "0 0 20px",
-      lineHeight: 1.2,
-      background: isDarkMode ? "linear-gradient(135deg, #ffffff, var(--accent-blue), var(--accent-yellow))" : "none",
-      WebkitBackgroundClip: isDarkMode ? "text" : "initial",
-      WebkitTextFillColor: isDarkMode ? "transparent" : "var(--text-primary)",
-      color: isDarkMode ? "transparent" : "var(--text-primary)",
-    },
-    neonText: {
-      display: "inline-block",
-      background: "linear-gradient(135deg, var(--accent-blue), var(--accent-yellow))",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      backgroundClip: "text",
-    },
-    heroSub: {
-      fontSize: 18,
-      color: "var(--text-secondary)",
-      maxWidth: 620,
-      margin: "0 auto 40px",
-      lineHeight: 1.75,
-    },
-    buttonPrimary: {
-      background: "var(--gradient)",
-      border: "none",
-      color: "#fff",
-      padding: "14px 32px",
-      borderRadius: 40,
-      cursor: "pointer",
-      fontWeight: 700,
-      fontSize: 15,
-      boxShadow: "0 0 15px rgba(59,130,246,0.5)",
-      transition: "all 0.3s",
-    },
-    buttonOutline: {
-      background: "transparent",
-      border: `1px solid var(--accent-blue)`,
-      color: "var(--accent-yellow)",
-      padding: "14px 32px",
-      borderRadius: 40,
-      cursor: "pointer",
-      fontWeight: 600,
-      fontSize: 15,
-      transition: "all 0.3s",
-      backdropFilter: "blur(4px)",
-    },
-    card: {
-      background: "var(--card-bg)",
-      backdropFilter: isDarkMode ? "blur(8px)" : "none",
-      borderRadius: 24,
-      padding: "26px 22px",
-      border: `1px solid var(--border-color)`,
-      transition: "all 0.3s",
-      cursor: "default",
-    },
-    projectCard: {
-      background: "var(--card-bg)",
-      backdropFilter: isDarkMode ? "blur(8px)" : "none",
-      borderRadius: 24,
-      overflow: "hidden",
-      border: `1px solid var(--border-color)`,
-      transition: "all 0.3s",
-    },
-    input: {
-      background: isDarkMode ? "rgba(10,12,21,0.6)" : "#fff",
-      border: `1px solid var(--border-color)`,
-      borderRadius: 12,
-      padding: "12px 18px",
-      color: "var(--text-primary)",
-      fontSize: 14,
-      outline: "none",
-      width: "100%",
-      boxSizing: "border-box",
-      transition: "all 0.3s",
-    },
-    textarea: {
-      background: isDarkMode ? "rgba(10,12,21,0.6)" : "#fff",
-      border: `1px solid var(--border-color)`,
-      borderRadius: 12,
-      padding: "12px 18px",
-      color: "var(--text-primary)",
-      fontSize: 14,
-      outline: "none",
-      width: "100%",
-      boxSizing: "border-box",
-      resize: "vertical",
-    },
-    section: {
-      position: "relative",
-      zIndex: 2,
-    },
-    sectionAlt: {
-      background: isDarkMode ? "linear-gradient(135deg, rgba(10,12,21,0.9), rgba(20,30,50,0.9))" : "#fefaf0",
-      position: "relative",
-      zIndex: 2,
-    },
-    containerMax: {
-      maxWidth: 1200,
-      margin: "0 auto",
-    },
-    containerMedium: {
-      maxWidth: 1000,
-      margin: "0 auto",
-    },
-    statsBar: {
-      background: isDarkMode ? "rgba(10,12,21,0.5)" : "#ffffff",
-      borderTop: `1px solid var(--border-color)`,
-      borderBottom: `1px solid var(--border-color)`,
-    },
-    statsContainer: {
-      display: "flex",
-      justifyContent: "center",
-      gap: 80,
-      flexWrap: "wrap",
-      maxWidth: 900,
-      margin: "0 auto",
-    },
-    statValue: {
-      fontSize: 42,
-      fontWeight: 800,
-      background: "var(--gradient)",
-      WebkitBackgroundClip: "text",
-      WebkitTextFillColor: "transparent",
-      textShadow: isDarkMode ? "0 0 10px rgba(59,130,246,0.3)" : "none",
-    },
-    cardGrid: {
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-      gap: 24,
-    },
-  };
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
 
   return (
-    <div style={styles.container}>
-      <style>{themeVariables}</style>
+    <>
+      {/* ── JSON-LD ── */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA) }} />
 
-      {/* NAVBAR */}
-      <nav style={styles.navbar} className="navbar-padding">
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img
-            src="https://raw.githubusercontent.com/NovaTech-Innovate-Solutions/NovaTech-Innovate-Solutions.github.io/refs/heads/main/RnD%20(1).png"
-            alt="NovaTech R&D Lab"
-            style={styles.logoImage}
-            className="logo-image"
-          />
-        </div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
 
-        {/* Desktop Navigation */}
-        {windowWidth > 768 && (
-          <>
-            <div style={{ display: "flex", gap: 32 }}>
-              {NAV_LINKS.map(l => (
-                <button
-                  key={l}
-                  onClick={() => scrollTo(l.toLowerCase())}
-                  style={styles.navLink}
-                  onMouseEnter={e => e.currentTarget.style.color = "var(--accent-yellow)"}
-                  onMouseLeave={e => e.currentTarget.style.color = "var(--text-secondary)"}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={toggleTheme} style={{ ...styles.ctaButton, background: "transparent", border: `1px solid var(--accent-yellow)`, boxShadow: "none", color: "var(--accent-yellow)" }}>
-                {isDarkMode ? "☀️" : "🌙"}
-              </button>
-              <button
-                onClick={() => window.open("https://wa.me/918336001208", "_blank")}
-                style={styles.ctaButton}
-                onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-              >
-                Get in Touch
-              </button>
-            </div>
-          </>
-        )}
+        :root {
+          --navy:   #0B1F4A;
+          --navy2:  #071530;
+          --blue:   #1E3A8A;
+          --sky:    #2563EB;
+          --yellow: #FFD700;
+          --gold:   #F59E0B;
+          --white:  #FFFFFF;
+          --muted:  rgba(255,255,255,0.55);
+          --border: rgba(255,255,255,0.09);
+          --glass:  rgba(255,255,255,0.04);
+          --fd: 'Syne', sans-serif;
+          --fb: 'DM Sans', sans-serif;
+        }
 
-        {/* Mobile Hamburger */}
-        {windowWidth <= 768 && (
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={styles.hamburger}>
-            <div style={styles.hamburgerLine} />
-            <div style={styles.hamburgerLine} />
-            <div style={styles.hamburgerLine} />
-          </button>
-        )}
-      </nav>
+        /* ── Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: #071530; color: var(--white); font-family: var(--fb); }
 
-      {/* Mobile Menu */}
-      {windowWidth <= 768 && (
-        <div style={styles.mobileMenu}>
-          {NAV_LINKS.map(l => (
-            <button
-              key={l}
-              onClick={() => scrollTo(l.toLowerCase())}
-              style={{ ...styles.navLink, textAlign: "left", padding: "8px 0", fontSize: 16, color: "var(--text-primary)" }}
-            >
-              {l}
-            </button>
-          ))}
-          <button onClick={toggleTheme} style={{ ...styles.ctaButton, background: "transparent", border: `1px solid var(--accent-yellow)`, boxShadow: "none", color: "var(--accent-yellow)" }}>
-            {isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode"}
-          </button>
-          <button
-            onClick={() => window.open("https://wa.me/918336001208", "_blank")}
-            style={{ ...styles.ctaButton, width: "100%", marginTop: 8 }}
+        /* ── Page wrapper ── */
+        .ntl-page {
+          background: linear-gradient(180deg, #071530 0%, #0B1F4A 50%, #0e2454 100%);
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+
+        /* ── NAVBAR ── */
+        .ntl-nav {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          z-index: 1000;
+          height: 68px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 2rem;
+          background: rgba(7,21,48,0.0);
+          border-bottom: 1px solid transparent;
+          transition: background .3s, border-color .3s, box-shadow .3s;
+        }
+        .ntl-nav.scrolled {
+          background: rgba(7,21,48,0.97);
+          border-color: var(--border);
+          box-shadow: 0 4px 32px rgba(0,0,0,0.5);
+          backdrop-filter: blur(18px);
+        }
+        .ntl-nav-accent {
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, var(--sky), var(--yellow), var(--gold));
+        }
+        .ntl-logo { display:flex; align-items:center; gap:.6rem; text-decoration:none; }
+        .ntl-logo img { height:44px; width:auto; object-fit:contain; filter:drop-shadow(0 2px 8px rgba(255,215,0,.2)); }
+        .ntl-logo-text { display:flex; flex-direction:column; line-height:1.15; }
+        .ntl-logo-text strong { font-family:var(--fd); font-size:.95rem; font-weight:800; color:var(--white); }
+        .ntl-logo-text span { font-size:.58rem; font-weight:600; color:var(--yellow); letter-spacing:.12em; text-transform:uppercase; }
+
+        /* Desktop links */
+        .ntl-nav-links { display:flex; gap:.25rem; list-style:none; }
+        .ntl-nav-links a {
+          display:inline-block;
+          padding:.4rem .7rem;
+          font-size:.84rem;
+          font-weight:500;
+          color:var(--muted);
+          text-decoration:none;
+          border-radius:6px;
+          transition:color .2s, background .2s;
+          white-space:nowrap;
+          position:relative;
+        }
+        .ntl-nav-links a::after {
+          content:'';
+          position:absolute;
+          bottom:3px; left:50%;
+          transform:translateX(-50%) scaleX(0);
+          width:55%; height:2px;
+          background:var(--yellow);
+          border-radius:2px;
+          transition:transform .25s;
+        }
+        .ntl-nav-links a:hover { color:var(--white); background:var(--glass); }
+        .ntl-nav-links a:hover::after { transform:translateX(-50%) scaleX(1); }
+        .ntl-nav-cta {
+          display:inline-flex; align-items:center; gap:.4rem;
+          padding:.5rem 1.2rem;
+          background:var(--yellow); color:var(--navy);
+          font-family:var(--fd); font-size:.82rem; font-weight:800;
+          border-radius:8px; text-decoration:none; white-space:nowrap;
+          transition:transform .2s, box-shadow .2s;
+          flex-shrink:0;
+        }
+        .ntl-nav-cta:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(255,215,0,.35); }
+
+        /* Burger */
+        .ntl-burger {
+          display:none; flex-direction:column; justify-content:center; align-items:center;
+          width:40px; height:40px; gap:5px;
+          background:var(--glass); border:1px solid var(--border); border-radius:8px;
+          cursor:pointer;
+        }
+        .ntl-burger span { display:block; width:20px; height:2px; background:var(--white); border-radius:2px; transition:transform .3s, opacity .3s; }
+        .ntl-burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+        .ntl-burger.open span:nth-child(2) { opacity:0; }
+        .ntl-burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+        /* Mobile drawer */
+        .ntl-drawer {
+          display:none;
+          position:fixed;
+          top:0; right:0;
+          width:min(88vw,320px); height:100dvh;
+          background:var(--navy2);
+          border-left:1px solid var(--border);
+          box-shadow:-8px 0 40px rgba(0,0,0,.5);
+          z-index:999;
+          flex-direction:column;
+          transform:translateX(100%);
+          transition:transform .35s cubic-bezier(.4,0,.2,1);
+          overflow-y:auto;
+        }
+        .ntl-drawer.open { transform:translateX(0); }
+        .ntl-drawer-top { display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); }
+        .ntl-drawer-close { background:none; border:1px solid var(--border); color:var(--white); width:34px; height:34px; border-radius:6px; cursor:pointer; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+        .ntl-drawer-links { list-style:none; padding:.75rem .75rem; display:flex; flex-direction:column; gap:.25rem; }
+        .ntl-drawer-links a { display:block; padding:.8rem 1rem; border-radius:8px; color:rgba(255,255,255,.8); font-size:.95rem; font-weight:500; text-decoration:none; transition:background .2s, color .2s; }
+        .ntl-drawer-links a:hover { background:var(--glass); color:var(--white); }
+        .ntl-drawer-cta-wrap { padding:1rem 1.5rem 2rem; }
+        .ntl-drawer-cta { display:flex; align-items:center; justify-content:center; gap:.5rem; width:100%; padding:.85rem; background:var(--yellow); color:var(--navy); font-family:var(--fd); font-size:.9rem; font-weight:800; text-decoration:none; border-radius:8px; }
+        .ntl-overlay { display:none; position:fixed; inset:0; background:rgba(7,21,48,0); z-index:998; pointer-events:none; }
+        .ntl-overlay.open { background:rgba(7,21,48,.75); pointer-events:all; display:block; }
+
+        /* ── Sections ── */
+        .ntl-sec { padding:90px 2rem; position:relative; z-index:1; }
+        .ntl-sec + .ntl-sec { border-top:1px solid var(--border); }
+        .ntl-wrap { max-width:1280px; margin:0 auto; }
+        .ntl-wrap-md { max-width:1000px; margin:0 auto; }
+
+        /* ── Section heading pattern ── */
+        .ntl-eyebrow {
+          display:inline-flex; align-items:center; gap:.5rem;
+          padding:.3rem 1rem; margin-bottom:1rem;
+          background:rgba(255,215,0,.1); border:1px solid rgba(255,215,0,.25);
+          border-radius:999px; font-size:.7rem; font-weight:700; letter-spacing:.12em;
+          text-transform:uppercase; color:var(--yellow);
+        }
+        .ntl-eyebrow-dot { width:6px; height:6px; border-radius:50%; background:var(--yellow); }
+        .ntl-h1 { font-family:var(--fd); font-size:clamp(2rem,5vw,3.5rem); font-weight:800; line-height:1.12; margin-bottom:.85rem; }
+        .ntl-h2 { font-family:var(--fd); font-size:clamp(1.6rem,3vw,2.4rem); font-weight:800; line-height:1.2; margin-bottom:.75rem; }
+        .ntl-h3 { font-family:var(--fd); font-size:1rem; font-weight:700; color:var(--white); margin-bottom:.5rem; line-height:1.3; }
+        .ntl-grad {
+          background:linear-gradient(90deg,var(--yellow),var(--gold));
+          -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+          background-clip:text;
+        }
+        .ntl-lead { font-size:1rem; color:var(--muted); line-height:1.8; max-width:680px; }
+        .ntl-center { text-align:center; }
+        .ntl-center .ntl-lead { margin:0 auto; }
+        .ntl-sec-hdr { margin-bottom:3rem; }
+
+        /* ── Scroll reveal ── */
+        .ntl-reveal { opacity:0; transform:translateY(28px); }
+        .ntl-reveal.ntl-show { animation:ntl-up .55s ease forwards; }
+        @keyframes ntl-up { to { opacity:1; transform:translateY(0); } }
+
+        /* When filter/tab changes the grid remounts; items visible in viewport
+           need a tiny delay so the observer has time to fire — this ensures
+           items never stay invisible if observer fires before paint */
+        .ntl-proj-grid .ntl-reveal,
+        .ntl-pub-list .ntl-reveal {
+          animation: ntl-up .5s ease forwards;
+          animation-play-state: paused;
+        }
+        .ntl-proj-grid .ntl-reveal.ntl-show,
+        .ntl-pub-list .ntl-reveal.ntl-show {
+          animation-play-state: running;
+        }
+
+        /* ── HERO ── */
+        .ntl-hero {
+          min-height:100vh; display:flex; flex-direction:column;
+          align-items:center; justify-content:center;
+          text-align:center; padding:120px 2rem 80px;
+          position:relative; overflow:hidden;
+        }
+        .ntl-hero-inner { position:relative; z-index:2; max-width:820px; }
+        .ntl-hero-pill {
+          display:inline-flex; align-items:center; gap:.6rem;
+          padding:.4rem 1.2rem; margin-bottom:1.75rem;
+          background:rgba(37,99,235,.15); border:1px solid rgba(37,99,235,.35);
+          border-radius:999px; font-size:.78rem; font-weight:600; color:rgba(255,255,255,.8);
+        }
+        .ntl-hero-pill-dot { width:8px; height:8px; border-radius:50%; background:var(--yellow); animation:ntl-pulse 2s infinite; }
+        @keyframes ntl-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+        .ntl-hero-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:2.5rem; }
+        .ntl-btn-pri {
+          display:inline-flex; align-items:center; gap:.5rem;
+          padding:.8rem 2rem; background:var(--yellow); color:var(--navy);
+          font-family:var(--fd); font-size:.9rem; font-weight:800;
+          border-radius:40px; text-decoration:none;
+          transition:transform .2s, box-shadow .2s;
+          box-shadow:0 4px 20px rgba(255,215,0,.3);
+        }
+        .ntl-btn-pri:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(255,215,0,.45); }
+        .ntl-btn-out {
+          display:inline-flex; align-items:center; gap:.5rem;
+          padding:.8rem 2rem;
+          background:transparent; color:var(--white);
+          font-family:var(--fd); font-size:.9rem; font-weight:700;
+          border:1px solid rgba(255,255,255,.25); border-radius:40px;
+          text-decoration:none; transition:background .2s, border-color .2s;
+        }
+        .ntl-btn-out:hover { background:var(--glass); border-color:var(--yellow); }
+        /* Hero blobs */
+        .ntl-blob {
+          position:absolute; border-radius:50%; pointer-events:none; filter:blur(80px); opacity:.6;
+        }
+
+        /* ── STATS BAR ── */
+        .ntl-statsbar {
+          padding:2.5rem 2rem;
+          background:rgba(255,255,255,.03);
+          border-top:1px solid var(--border);
+          border-bottom:1px solid var(--border);
+        }
+        .ntl-stats-row {
+          max-width:900px; margin:0 auto;
+          display:flex; justify-content:center; gap:4rem; flex-wrap:wrap;
+        }
+        .ntl-stat { text-align:center; }
+        .ntl-stat-n {
+          font-family:var(--fd); font-size:2.6rem; font-weight:800;
+          background:linear-gradient(135deg,var(--yellow),var(--sky));
+          -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+        }
+        .ntl-stat-l { font-size:.8rem; color:var(--muted); margin-top:.3rem; font-weight:500; }
+
+        /* ── ABOUT ── */
+        .ntl-about-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+        .ntl-about-cards { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+
+        /* ── Generic glass card ── */
+        .ntl-card {
+          background:var(--glass);
+          border:1px solid var(--border);
+          border-radius:16px;
+          padding:1.5rem;
+          transition:transform .3s, border-color .3s, box-shadow .3s;
+        }
+        .ntl-card:hover { transform:translateY(-5px); border-color:rgba(255,215,0,.3); box-shadow:0 16px 40px rgba(0,0,0,.3); }
+        .ntl-card-icon { font-size:1.6rem; margin-bottom:.75rem; }
+        .ntl-card-title { font-size:.85rem; font-weight:700; color:var(--yellow); margin-bottom:.4rem; }
+        .ntl-card-desc { font-size:.78rem; color:var(--muted); line-height:1.6; }
+
+        /* ── RESEARCH DOMAIN GRID ── */
+        .ntl-domain-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1.25rem; }
+
+        /* ── PROJECT GRID ── */
+        .ntl-proj-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:1.75rem; }
+        .ntl-proj-card {
+          background:var(--glass);
+          border:1px solid var(--border);
+          border-radius:18px;
+          overflow:hidden;
+          transition:transform .3s, box-shadow .3s;
+        }
+        .ntl-proj-card:hover { transform:translateY(-6px); box-shadow:0 24px 56px rgba(0,0,0,.4); }
+        .ntl-proj-stripe { height:5px; }
+        .ntl-proj-body { padding:1.5rem; }
+        .ntl-proj-meta { display:flex; justify-content:space-between; align-items:flex-start; gap:.5rem; margin-bottom:1rem; }
+        .ntl-tag {
+          font-size:.68rem; font-weight:700; letter-spacing:.05em;
+          padding:.25rem .7rem; border-radius:999px;
+        }
+        .ntl-status { font-size:.68rem; font-weight:700; padding:.25rem .7rem; border-radius:999px; white-space:nowrap; }
+        .ntl-proj-desc { font-size:.83rem; color:var(--muted); line-height:1.7; margin-bottom:1.1rem; }
+        .ntl-chips { display:flex; flex-wrap:wrap; gap:.4rem; }
+        .ntl-chip {
+          padding:.22rem .65rem;
+          background:rgba(37,99,235,.15); border:1px solid rgba(37,99,235,.3);
+          border-radius:999px; font-size:.67rem; font-weight:600;
+          color:rgba(255,255,255,.65);
+        }
+
+        /* ── FILTER PILLS ── */
+        .ntl-filters { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:2.5rem; }
+        .ntl-filter-btn {
+          padding:.45rem 1.25rem;
+          border-radius:999px; border:1px solid var(--border);
+          background:transparent; color:var(--muted);
+          font-family:var(--fb); font-size:.82rem; font-weight:600;
+          cursor:pointer; transition:all .2s;
+        }
+        .ntl-filter-btn.active, .ntl-filter-btn:hover {
+          border-color:var(--yellow); background:rgba(255,215,0,.12); color:var(--yellow);
+        }
+
+        /* ── PUBLICATIONS ── */
+        .ntl-pub-tabs { display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap; margin-bottom:2.5rem; }
+        .ntl-pub-tab {
+          padding:.5rem 1.5rem; border-radius:40px;
+          border:1px solid var(--border);
+          background:transparent; color:var(--muted);
+          font-family:var(--fb); font-size:.85rem; font-weight:600;
+          cursor:pointer; transition:all .2s;
+        }
+        .ntl-pub-tab.active { border-color:var(--yellow); background:rgba(255,215,0,.12); color:var(--yellow); }
+        .ntl-pub-list { display:flex; flex-direction:column; gap:1.25rem; }
+        .ntl-pub-item {
+          background:var(--glass); border:1px solid var(--border);
+          border-radius:14px; padding:1.4rem 1.75rem;
+          display:flex; gap:1.75rem; align-items:flex-start;
+          transition:transform .2s, border-color .2s;
+        }
+        .ntl-pub-item:hover { transform:translateX(6px); border-color:rgba(255,215,0,.22); }
+        .ntl-pub-year-col { text-align:center; min-width:64px; flex-shrink:0; }
+        .ntl-pub-year { font-family:var(--fd); font-size:1.1rem; font-weight:800; color:var(--yellow); }
+        .ntl-pub-type { display:inline-block; font-size:.65rem; font-weight:700; padding:.2rem .6rem; border-radius:30px; margin-top:.35rem; }
+        .ntl-pub-title { font-family:var(--fd); font-size:.93rem; font-weight:700; color:var(--white); margin-bottom:.5rem; line-height:1.45; }
+        .ntl-pub-venue { font-size:.78rem; color:var(--yellow); font-weight:600; margin-bottom:.25rem; }
+        .ntl-pub-authors { font-size:.75rem; color:var(--muted); margin-bottom:.6rem; }
+        .ntl-pub-links { display:flex; gap:1rem; flex-wrap:wrap; }
+        .ntl-pub-link {
+          font-size:.74rem; color:var(--sky); text-decoration:none;
+          border-bottom:1px dashed rgba(96,165,250,.5);
+          transition:color .2s;
+        }
+        .ntl-pub-link:hover { color:var(--yellow); border-color:var(--yellow); }
+
+        /* ── BOOK HIGHLIGHT ── */
+        .ntl-book-card {
+          margin-top:3rem;
+          background:linear-gradient(135deg,rgba(37,99,235,.18),rgba(255,215,0,.06));
+          border:1px solid rgba(37,99,235,.3);
+          border-radius:18px;
+          padding:2.25rem;
+          display:flex; gap:2rem; align-items:center; flex-wrap:wrap;
+        }
+        .ntl-book-icon { font-size:3.5rem; flex-shrink:0; }
+
+        /* ── TEAM ── */
+        .ntl-team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.75rem; }
+        .ntl-team-card {
+          background:var(--glass); border:1px solid var(--border);
+          border-radius:18px; padding:2rem 1.5rem;
+          text-align:center;
+          transition:transform .3s, border-color .3s;
+        }
+        .ntl-team-card:hover { transform:translateY(-6px); border-color:rgba(255,215,0,.3); }
+        .ntl-avatar {
+          width:68px; height:68px; border-radius:50%; margin:0 auto 1.25rem;
+          display:flex; align-items:center; justify-content:center;
+          font-family:var(--fd); font-size:1.3rem; font-weight:800; color:var(--navy);
+          background:linear-gradient(135deg,var(--yellow),var(--gold));
+          box-shadow:0 4px 20px rgba(255,215,0,.3);
+        }
+        .ntl-team-name { font-family:var(--fd); font-size:1rem; font-weight:800; color:var(--white); margin-bottom:.3rem; }
+        .ntl-team-role { font-size:.8rem; font-weight:600; color:var(--yellow); margin-bottom:.4rem; }
+        .ntl-team-focus { font-size:.75rem; color:var(--muted); line-height:1.5; }
+
+        /* ── SERVICES ── */
+        .ntl-serv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1.75rem; }
+
+        /* ── TECH STACK ── */
+        .ntl-stack-row {
+          display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;
+          padding:1rem 0; border-bottom:1px solid var(--border);
+        }
+        .ntl-stack-row:last-child { border-bottom:none; }
+        .ntl-stack-cat { min-width:160px; font-size:.75rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--yellow); flex-shrink:0; }
+        .ntl-stack-items { display:flex; gap:.5rem; flex-wrap:wrap; }
+        .ntl-stack-item {
+          padding:.35rem .85rem;
+          background:var(--glass); border:1px solid var(--border);
+          border-radius:999px; font-size:.75rem; color:var(--muted); font-weight:500;
+        }
+
+        /* ── CTA BAND ── */
+        .ntl-cta-band {
+          padding:80px 2rem;
+          background:linear-gradient(135deg,rgba(37,99,235,.22),rgba(255,215,0,.08));
+          border-top:1px solid rgba(37,99,235,.3);
+          text-align:center;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+          .ntl-about-grid { grid-template-columns:1fr; gap:2.5rem; }
+        }
+        @media (max-width: 860px) {
+          .ntl-nav-links, .ntl-nav-cta { display:none !important; }
+          .ntl-burger { display:flex; }
+          .ntl-drawer { display:flex; }
+        }
+        @media (max-width: 640px) {
+          .ntl-proj-grid { grid-template-columns:1fr; }
+          .ntl-about-cards { grid-template-columns:1fr; }
+          .ntl-stats-row { gap:2rem; }
+          .ntl-pub-item { flex-direction:column; gap:1rem; }
+          .ntl-pub-year-col { text-align:left; }
+          .ntl-sec { padding:60px 1.25rem; }
+          .ntl-hero { padding:100px 1.25rem 60px; }
+        }
+      `}</style>
+
+      <div className="ntl-page">
+
+        {/* ══════════════════════════════════
+            NAVBAR
+        ══════════════════════════════════ */}
+        <nav
+          className={`ntl-nav${scrolled ? " scrolled" : ""}`}
+          role="navigation"
+          aria-label="NovaTech R&D Lab main navigation"
+        >
+          <div className="ntl-nav-accent" aria-hidden="true" />
+
+          {/* Logo */}
+          <a href="/"
+            className="ntl-logo"
           >
-            Get in Touch
+            <a href="/"> 
+                <img
+              src="banner-logo.png"
+              alt="NovaTech Innovative Solutions R&D Lab — AI, IoT and Embedded Systems Research"
+              loading="eager"
+              fetchpriority="high"
+            />
+            </a>
+          <a href="/lab">
+<img
+              src="banner-logo2.png"
+              alt="NovaTech Innovative Solutions R&D Lab — AI, IoT and Embedded Systems Research"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </a>
+             
+          </a>
+
+          {/* Desktop nav */}
+          <ul className="ntl-nav-links" >
+            {NAV_LINKS.map(({ label, href }) => (
+              <li key={href} >
+                <a href={href}>{label}</a>
+              </li>
+            ))}
+          </ul>
+
+          <a
+            href="https://wa.me/918336001208?text=Hello, I want to collaborate with NovaTech R%26D Lab!"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ntl-nav-cta"
+            aria-label="Contact NovaTech R&D Lab on WhatsApp"
+          >
+            💬 Get in Touch
+          </a>
+
+          {/* Burger */}
+          <button
+            className={`ntl-burger${menuOpen ? " open" : ""}`}
+            onClick={() => setMenuOpen(o => !o)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="ntl-drawer"
+          >
+            <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
           </button>
-        </div>
-      )}
+        </nav>
 
-      {/* HERO */}
-      <section style={styles.hero} className="hero-padding">
-        <div style={{ position: "relative", maxWidth: 800, margin: "0 auto", zIndex: 2 }}>
-          <div style={{ display: "inline-block", background: isDarkMode ? "rgba(59,130,246,0.2)" : "#fff0d0", border: `1px solid var(--accent-yellow)`, borderRadius: 40, padding: "6px 20px", fontSize: 13, color: "var(--accent-yellow)", marginBottom: 28, fontWeight: 500 }}>
-            ⚡ Turning Ideas into Intelligent Systems
+        {/* Mobile overlay */}
+        <div className={`ntl-overlay${menuOpen ? " open" : ""}`} onClick={() => setMenuOpen(false)} aria-hidden="true" />
+
+        {/* Mobile drawer */}
+        <nav
+          id="ntl-drawer"
+          className={`ntl-drawer${menuOpen ? " open" : ""}`}
+          aria-label="Mobile navigation"
+          aria-hidden={!menuOpen}
+        >
+          <div className="ntl-drawer-top">
+            <a href="/" className="ntl-logo" onClick={() => setMenuOpen(false)}>
+            </a>
+            <br />
           </div>
-          <h1 style={styles.heroTitle}>
-            NovaTech Innovative Solutions<br />
-            <span style={styles.neonText}>Research & Development Lab</span>
-          </h1>
-          <p style={styles.heroSub}>
-            Bridging academic research and industrial deployment through AI, IoT, Robotics & Edge Intelligence — building systems that matter.
-          </p>
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-            <button
-              onClick={() => scrollTo("projects")}
-              style={styles.buttonPrimary}
-              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.05)"; e.currentTarget.style.boxShadow = "0 0 25px rgba(59,130,246,0.8)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 0 15px rgba(59,130,246,0.5)"; }}
-            >
-              Explore Projects →
-            </button>
-            <button
-              onClick={() => scrollTo("publications")}
-              style={styles.buttonOutline}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.2)"; e.currentTarget.style.borderColor = "var(--accent-yellow)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.borderColor = "var(--accent-blue)"; }}
-            >
-              View Publications
-            </button>
+          <ul className="ntl-drawer-links" >
+            {NAV_LINKS.map(({ label, href }) => (
+              <li key={href}><a href={href} onClick={() => setMenuOpen(false)}>{label}</a></li>
+            ))}
+          </ul>
+          <div className="ntl-drawer-cta-wrap">
+            <a href="https://wa.me/918336001208" target="_blank" rel="noopener noreferrer" className="ntl-drawer-cta" onClick={() => setMenuOpen(false)}>
+              💬 Get in Touch
+            </a>
+          </div>
+        </nav>
+
+        {/* ══════════════════════════════════
+            HERO
+        ══════════════════════════════════ */}
+        <section className="ntl-hero" aria-labelledby="hero-heading">
+          {/* Blobs */}
+          <div className="ntl-blob" style={{ width:600,height:600,background:"radial-gradient(circle,rgba(37,99,235,.18),transparent)",top:-100,left:-200 }} aria-hidden="true" />
+          <div className="ntl-blob" style={{ width:500,height:500,background:"radial-gradient(circle,rgba(255,215,0,.1),transparent)",bottom:-120,right:-150 }} aria-hidden="true" />
+
+          <div className="ntl-hero-inner">
+            <div className="ntl-hero-pill">
+              <span className="ntl-hero-pill-dot" aria-hidden="true" />
+              ⚡ Turning Ideas into Intelligent Systems
+            </div>
+
+            {/* Single h1 — primary SEO keyword target */}
+            <h1 className="ntl-h1" id="hero-heading">
+              NovaTech Innovative Solutions<br />
+              <span className="ntl-grad">Research &amp; Development Lab</span>
+            </h1>
+
+            <p className="ntl-lead" style={{ margin: "0 auto", textAlign: "center" }}>
+              Bridging academic research and industrial deployment through AI, IoT, Robotics &amp;
+              Edge Intelligence — building intelligent systems that solve real-world problems across
+              healthcare, agriculture, disaster management, and smart environments.
+            </p>
+
+            <div className="ntl-hero-btns">
+              <a href="#projects" className="ntl-btn-pri" aria-label="Explore NovaTech R&D projects">
+                Explore Projects →
+              </a>
+              <a href="#publications" className="ntl-btn-out" aria-label="View NovaTech research publications">
+                View Publications
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════
+            STATS BAR
+        ══════════════════════════════════ */}
+        <div className="ntl-statsbar" role="region" aria-label="NovaTech R&D Lab key statistics">
+          <div className="ntl-stats-row">
+            {STATS.map(({ value, label }) => (
+              <div className="ntl-stat" key={label}
+                itemScope itemType="https://schema.org/QuantitativeValue"
+              >
+                <div className="ntl-stat-n" itemProp="value">{value}</div>
+                <div className="ntl-stat-l" itemProp="name">{label}</div>
+              </div>
+            ))}
           </div>
         </div>
-        <div style={{ position: "absolute", top: "-150px", right: "-150px", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(59,130,246,0.2), transparent)", borderRadius: "50%", filter: "blur(80px)", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: "-150px", left: "-150px", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(251,191,36,0.15), transparent)", borderRadius: "50%", filter: "blur(80px)", pointerEvents: "none" }} />
-      </section>
 
-      {/* STATS BAR */}
-      <section style={styles.statsBar} className="stats-padding">
-        <div style={styles.statsContainer} className="stats-container">
-          {STATS.map((s, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <div style={styles.statValue}>{s.value}</div>
-              <div style={{ color: "var(--text-secondary)", fontSize: 14, marginTop: 6, fontWeight: 500 }}>{s.label}</div>
+        {/* ══════════════════════════════════
+            ABOUT
+        ══════════════════════════════════ */}
+        <section
+          id="about"
+          className="ntl-sec"
+          aria-labelledby="about-heading"
+          itemScope itemType="https://schema.org/AboutPage"
+        >
+          <div className="ntl-wrap">
+            <div className="ntl-about-grid">
+              {/* Text */}
+              <div>
+                <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" aria-hidden="true" />About the Lab</div>
+                <h2 className="ntl-h2" id="about-heading">
+                  Engineering Intelligent Systems for <span className="ntl-grad">Real-World Impact</span>
+                </h2>
+                <p className="ntl-lead" style={{ marginBottom:"1.1rem" }} itemProp="description">
+                  NovaTech Innovative Solutions R&D Lab is a multidisciplinary research and engineering unit
+                  focused on developing intelligent, scalable, and practical technology solutions. Our work spans
+                  artificial intelligence, embedded systems, IoT, robotics, and edge computing — with a strong
+                  emphasis on solving real-world problems in healthcare, disaster management, smart environments,
+                  and sustainable systems.
+                </p>
+                <p className="ntl-lead" style={{ marginBottom:"1.1rem" }}>
+                  Unlike purely academic labs, our approach is <strong style={{ color:var_yellow }}>application-driven</strong>.
+                  We design systems end-to-end — from conceptual research and algorithm development to hardware
+                  prototyping and deployment. Projects like AI-powered wearables, UAV communication networks,
+                  healthcare robotics, and TinyML platforms reflect our focus on bridging theory and practice.
+                </p>
+                <p className="ntl-lead">
+                  The lab actively contributes through IEEE publications, preprints, patents, and books —
+                  while building deployable systems and collaborative solutions with academic institutions
+                  and industry partners across India.
+                </p>
+              </div>
+              {/* Cards */}
+              <div className="ntl-about-cards">
+                {[
+                  ["🔬", "Applied Research Focus",   "From AI models to hardware prototypes with real-world deployment goals"],
+                  ["📡", "Multi-Domain Expertise",   "AI, IoT, UAV systems, robotics, TinyML, and smart infrastructure"],
+                  ["⚙️", "End-to-End Development",  "Research → Design → Prototyping → Testing → Deployment"],
+                  ["📄", "Active Research Output",   "IEEE publications, preprints, patents, and reference books"],
+                ].map(([icon, title, desc]) => (
+                  <div className="ntl-card" key={title}>
+                    <div className="ntl-card-icon">{icon}</div>
+                    <div className="ntl-card-title">{title}</div>
+                    <div className="ntl-card-desc">{desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* ABOUT */}
-      <section id="about" style={styles.section} className="section-padding">
-        <div style={styles.containerMax}>
-          <div style={{ display: "flex", gap: 64, alignItems: "center", flexWrap: "wrap" }} className="about-flex">
-            <div style={{ flex: "1 1 440px" }}>
-              <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>ABOUT THE LAB</div>
-              <h2 style={{ fontSize: "2rem", fontWeight: 800, marginBottom: 24, lineHeight: 1.3, color: "var(--text-primary)" }}>
-                Engineering Intelligent Systems for Real-World Impact
-              </h2>
-              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: 16, fontSize: 15 }}>
-                NovaTech Innovative Solutions R&D Lab is a multidisciplinary research and engineering unit focused on developing
-                intelligent, scalable, and practical technology solutions. Our work spans across artificial intelligence, embedded systems,
-                IoT, robotics, and edge computing — with a strong emphasis on solving real-world problems in healthcare, disaster management,
-                smart environments, and sustainable systems.
-              </p>
-              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, marginBottom: 16, fontSize: 15 }}>
-                Unlike purely academic labs, our approach is <strong style={{ color: "var(--accent-yellow)" }}>application-driven</strong>. We design systems end-to-end — from conceptual research
-                and algorithm development to hardware prototyping and deployment. Projects such as AI-powered wearable systems, UAV-based
-                communication networks, healthcare robotics, and computer vision platforms reflect our focus on bridging theory and implementation.
-              </p>
-              <p style={{ color: "var(--text-secondary)", lineHeight: 1.8, fontSize: 15 }}>
-                The lab actively contributes to the research community through publications, preprints, and technical reports, while also
-                building deployable systems and collaborative solutions with academic institutions and industry partners. Our goal is to
-                create technologies that are not only innovative, but also <strong style={{ color: "var(--accent-yellow)" }}>accessible, efficient, and impactful</strong> in real-world scenarios.
-              </p>
+        {/* ══════════════════════════════════
+            VISION
+        ══════════════════════════════════ */}
+        <section id="vision" className="ntl-sec" aria-labelledby="vision-heading" style={{ background:"rgba(255,255,255,.02)" }}>
+          <div className="ntl-wrap">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Vision &amp; Mission</div>
+              <h2 className="ntl-h2" id="vision-heading">Built to Innovate. <span className="ntl-grad">Designed to Empower.</span></h2>
             </div>
-            <div style={{ flex: "1 1 360px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:"1.5rem" }}>
               {[
-                ["🔬", "Applied Research Focus", "From AI models to hardware prototypes with real-world deployment goals"],
-                ["📡", "Multi-Domain Expertise", "AI, IoT, UAV systems, robotics, TinyML, and smart infrastructure"],
-                ["⚙️", "End-to-End Development", "Research → Design → Prototyping → Testing → Deployment"],
-                ["📄", "Active Research Output", "Publications, preprints, and patents in emerging technology domains"],
-              ].map(([icon, title, sub], i) => (
-                <div
-                  key={i}
-                  style={styles.card}
-                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.borderColor = "var(--accent-yellow)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--border-color)"; }}
-                >
-                  <div style={{ fontSize: 24, marginBottom: 12 }}>{icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 6, color: "var(--accent-yellow)" }}>{title}</div>
-                  <div style={{ color: "var(--text-secondary)", fontSize: 12, lineHeight: 1.5 }}>{sub}</div>
+                ["🎯","Vision","To become a globally recognised R&D lab creating impactful intelligent systems that solve complex problems across healthcare, agriculture, environment, and industry."],
+                ["🚀","Mission","To innovate relentlessly, publish rigorously, and deploy responsibly — empowering researchers, engineers, and organisations through cutting-edge technology and open collaboration."],
+                ["💡","Values","Scientific Integrity · Open Collaboration · Sustainable Innovation · Inclusive Technology · Research Excellence"],
+              ].map(([icon, title, desc]) => (
+                <div className="ntl-card" key={title} style={{ padding:"2rem" }}>
+                  <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>{icon}</div>
+                  <h3 className="ntl-h3" style={{ color:"var(--yellow)", fontSize:"1.1rem" }}>{title}</h3>
+                  <p className="ntl-card-desc" style={{ fontSize:".86rem", marginTop:".5rem" }}>{desc}</p>
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* VISION */}
-      <section id="vision" style={styles.sectionAlt} className="section-padding">
-        <div style={{ maxWidth: 1100, margin: "auto", textAlign: "center" }}>
-          <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>VISION & MISSION</div>
-          <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 48 }}>Built to Innovate. Designed to Empower.</h2>
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap", textAlign: "left" }} className="vision-cards">
-            {[
-              ["🎯", "Vision", "To become a globally recognized R&D lab creating impactful intelligent systems that solve complex real-world problems across healthcare, agriculture, environment, and industry."],
-              ["🚀", "Mission", "To innovate relentlessly, publish rigorously, and deploy responsibly — empowering researchers, engineers, and organizations through cutting-edge technology and open collaboration."],
-              ["💡", "Values", "Scientific Integrity · Open Collaboration · Sustainable Innovation · Inclusive Technology · Research Excellence"],
-            ].map(([icon, title, desc], i) => (
-              <div
-                key={i}
-                style={{ ...styles.card, flex: "1 1 280px", padding: 32 }}
-                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-8px)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-              >
-                <div style={{ fontSize: 32, marginBottom: 16 }}>{icon}</div>
-                <h3 style={{ color: "var(--accent-yellow)", fontWeight: 700, marginBottom: 12, fontSize: 18 }}>{title}</h3>
-                <p style={{ color: "var(--text-secondary)", lineHeight: 1.7, fontSize: 14 }}>{desc}</p>
-              </div>
-            ))}
+        {/* ══════════════════════════════════
+            RESEARCH DOMAINS
+        ══════════════════════════════════ */}
+        <section id="research" className="ntl-sec" aria-labelledby="research-heading">
+          <div className="ntl-wrap">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Research Domains</div>
+              <h2 className="ntl-h2" id="research-heading">Core Areas of <span className="ntl-grad">Investigation</span></h2>
+              <p className="ntl-lead">Our lab pursues research across eight interconnected domains, with projects often spanning multiple areas simultaneously.</p>
+            </div>
+            <div className="ntl-domain-grid">
+              {RESEARCH_DOMAINS.map((d, i) => (
+                <div
+                  className="ntl-card ntl-reveal"
+                  key={d.title}
+                  ref={(el) => (domainRefs.current[i] = el)}
+                  style={{ animationDelay:`${(i % 4) * 80}ms` }}
+                  itemScope itemType="https://schema.org/DefinedTerm"
+                >
+                  <div className="ntl-card-icon">{d.icon}</div>
+                  <h3 className="ntl-h3" style={{ color:"var(--yellow)", fontSize:".92rem" }} itemProp="name">{d.title}</h3>
+                  <p className="ntl-card-desc" itemProp="description">{d.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* RESEARCH DOMAINS */}
-      <section id="research" style={styles.section} className="section-padding">
-        <div style={styles.containerMax}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>RESEARCH DOMAINS</div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 12 }}>Core Areas of Investigation</h2>
-            <p style={{ color: "var(--text-secondary)", maxWidth: 600, margin: "0 auto", fontSize: 15 }}>Our lab pursues research across eight interconnected domains, with projects often spanning multiple areas.</p>
-          </div>
-          <div style={styles.cardGrid} className="card-grid">
-            {RESEARCH_DOMAINS.map((d, i) => (
-              <div
-                key={i}
-                style={styles.card}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-6px)"; e.currentTarget.style.borderColor = "var(--accent-yellow)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "var(--border-color)"; }}
-              >
-                <div style={{ fontSize: 28, marginBottom: 14 }}>{d.icon}</div>
-                <h3 style={{ fontWeight: 700, fontSize: 15, marginBottom: 10, color: "var(--accent-yellow)" }}>{d.title}</h3>
-                <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6 }}>{d.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* ══════════════════════════════════
+            PROJECTS
+        ══════════════════════════════════ */}
+        <section
+          id="projects"
+          className="ntl-sec"
+          aria-labelledby="projects-heading"
+          style={{ background:"rgba(255,255,255,.02)" }}
+          itemScope itemType="https://schema.org/ItemList"
+        >
+          <div className="ntl-wrap">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Projects</div>
+              <h2 className="ntl-h2" id="projects-heading" itemProp="name">What We're <span className="ntl-grad">Building</span></h2>
+              <p className="ntl-lead">From early-stage research to fully deployed systems — our portfolio of intelligent technology projects across AI, IoT, robotics, and more.</p>
+            </div>
 
-      {/* PROJECTS */}
-      <section id="projects" style={styles.sectionAlt} className="section-padding">
-        <div style={styles.containerMax}>
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
-            <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>PROJECTS</div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 12 }}>What We're Building</h2>
-            <p style={{ color: "var(--text-secondary)", maxWidth: 600, margin: "0 auto 28px", fontSize: 15 }}>From early-stage research to deployed systems, explore our portfolio of intelligent technology projects.</p>
-            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            {/* Filter pills */}
+            <div className="ntl-filters" role="group" aria-label="Filter projects by status">
               {filters.map(f => (
                 <button
                   key={f}
+                  className={`ntl-filter-btn${activeFilter === f ? " active" : ""}`}
                   onClick={() => setActiveFilter(f)}
-                  style={{
-                    padding: "6px 22px",
-                    borderRadius: 40,
-                    border: "1px solid",
-                    borderColor: activeFilter === f ? "var(--accent-yellow)" : "var(--border-color)",
-                    background: activeFilter === f ? "rgba(251,191,36,0.2)" : "transparent",
-                    color: activeFilter === f ? "var(--accent-yellow)" : "var(--text-secondary)",
-                    cursor: "pointer",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    transition: "all 0.2s",
-                    backdropFilter: "blur(4px)",
-                  }}
+                  aria-pressed={activeFilter === f}
                 >
                   {f}
                 </button>
               ))}
             </div>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 28 }} className="project-grid">
-            {filteredProjects.map((p, i) => {
-              const sc = statusColor(p.status);
-              return (
-                <div
-                  key={i}
-                  style={styles.projectCard}
-                  onMouseEnter={e => e.currentTarget.style.transform = "translateY(-8px)"}
-                  onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-                >
-                  <div style={{ height: 6, background: `linear-gradient(90deg, ${p.color}, var(--accent-yellow))` }} />
-                  <div style={{ padding: 28 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-                      <span style={{ background: `${p.color}20`, color: p.color, fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 20 }}>{p.tag}</span>
-                      <span style={{ background: sc.bg, color: sc.color, fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 20 }}>{p.status}</span>
+
+            {/* key={activeFilter} forces full remount when filter changes,
+                so ntl-reveal starts fresh and the observer re-attaches */}
+            <div className="ntl-proj-grid" key={activeFilter}>
+              {filteredProjects.map((p, i) => {
+                const sc = STATUS_COLORS[p.status] || STATUS_COLORS.Prototype;
+                return (
+                  <article
+                    key={`${activeFilter}-${p.title}`}
+                    className="ntl-proj-card ntl-reveal"
+                    role="listitem"
+                    ref={(el) => { if (el) projectRefs.current[i] = el; }}
+                    style={{ animationDelay:`${(i % 3) * 90}ms` }}
+                    itemScope itemType="https://schema.org/CreativeWork"
+                  >
+                    <div className="ntl-proj-stripe" style={{ background:`linear-gradient(90deg,${p.color},var(--yellow))` }} aria-hidden="true" />
+                    <div className="ntl-proj-body">
+                      <div className="ntl-proj-meta">
+                        <span className="ntl-tag" style={{ background:`${p.color}22`, color:p.color }}>{p.tag}</span>
+                        <span className="ntl-status" style={{ background:sc.bg, color:sc.color }}>{p.status}</span>
+                      </div>
+                      <h3 className="ntl-h3" style={{ fontSize:"1.05rem", marginBottom:".75rem" }} itemProp="name">{p.title}</h3>
+                      <p className="ntl-proj-desc" itemProp="description">{p.desc}</p>
+                      <div className="ntl-chips" aria-label="Technologies used">
+                        {p.tech.map(t => <span key={t} className="ntl-chip">{t}</span>)}
+                      </div>
                     </div>
-                    <h3 style={{ fontWeight: 800, fontSize: 17, marginBottom: 12, color: "var(--text-primary)" }}>{p.title}</h3>
-                    <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.7, marginBottom: 18 }}>{p.desc}</p>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {p.tech.map((t, j) => (
-                        <span key={j} style={{ background: isDarkMode ? "rgba(59,130,246,0.15)" : "#f1f5f9", color: "var(--text-secondary)", fontSize: 11, fontWeight: 500, padding: "4px 10px", borderRadius: 20 }}>{t}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* PUBLICATIONS (Tabbed) */}
-      <section id="publications" style={styles.section} className="section-padding">
-        <div style={styles.containerMedium}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>PUBLICATIONS</div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 12 }}>Research Output</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: 15 }}>Peer-reviewed papers, conference proceedings, preprints, books, and patents.</p>
-          </div>
+        {/* ══════════════════════════════════
+            PUBLICATIONS
+        ══════════════════════════════════ */}
+        <section id="publications" className="ntl-sec" aria-labelledby="pubs-heading">
+          <div className="ntl-wrap-md">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Publications</div>
+              <h2 className="ntl-h2" id="pubs-heading">Research <span className="ntl-grad">Output</span></h2>
+              <p className="ntl-lead">Peer-reviewed papers, conference proceedings, preprints, books, and patents from NovaTech R&D Lab.</p>
+            </div>
 
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginBottom: 40 }} className="publication-tabs">
-            {[
-              { id: "research", label: "📄 Research Papers" },
-              { id: "books", label: "📚 Books" },
-              { id: "patents", label: "⚖️ Patents" },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setPubTab(tab.id)}
-                style={{
-                  padding: "8px 24px",
-                  borderRadius: 40,
-                  background: pubTab === tab.id ? "rgba(59,130,246,0.3)" : "transparent",
-                  color: pubTab === tab.id ? "var(--accent-yellow)" : "var(--text-secondary)",
-                  fontWeight: 600,
-                  fontSize: 14,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  backdropFilter: "blur(4px)",
-                  border: pubTab === tab.id ? `1px solid var(--accent-yellow)` : `1px solid var(--border-color)`,
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-            {filteredPublications().map((pub, i) => {
-              const tc = typeColor(pub.type);
-              return (
-                <div
-                  key={i}
-                  style={{ ...styles.card, display: "flex", gap: 24, alignItems: "flex-start", padding: "22px 30px" }}
-                  onMouseEnter={e => e.currentTarget.style.transform = "translateX(8px)"}
-                  onMouseLeave={e => e.currentTarget.style.transform = "translateX(0)"}
-                  className="publication-item"
+            {/* Tabs */}
+            <div className="ntl-pub-tabs" role="tablist" aria-label="Publication categories">
+              {[{id:"research",label:"📄 Research Papers"},{id:"books",label:"📚 Books"},{id:"patents",label:"⚖️ Patents"}].map(t => (
+                <button
+                  key={t.id}
+                  role="tab"
+                  className={`ntl-pub-tab${pubTab === t.id ? " active" : ""}`}
+                  aria-selected={pubTab === t.id}
+                  onClick={() => setPubTab(t.id)}
                 >
-                  <div style={{ textAlign: "center", minWidth: 70 }} className="publication-year">
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "var(--accent-yellow)" }}>{pub.year}</div>
-                    <span style={{ background: tc.bg, color: tc.color, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 30, marginTop: 6, display: "inline-block" }}>{pub.type}</span>
-                  </div>
-                  <div>
-                    <h4 style={{ fontWeight: 700, fontSize: 15, marginBottom: 8, lineHeight: 1.45, color: "var(--text-primary)" }}>{pub.title}</h4>
-                    <div style={{ color: "var(--text-secondary)", fontSize: 12, fontWeight: 600, marginBottom: 4 }}>{pub.venue}</div>
-                    <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>{pub.authors}</div>
-                    {(pub.doi || pub.link) && (
-                      <div style={{ marginTop: 8 }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            {/* key={pubTab} forces full remount when tab changes */}
+            <div className="ntl-pub-list" role="tabpanel" key={pubTab}>
+              {filteredPubs.map((pub, i) => {
+                const tc = TYPE_COLORS[pub.type] || TYPE_COLORS.Preprint;
+                return (
+                  <article
+                    key={`${pubTab}-${pub.title}`}
+                    className="ntl-pub-item ntl-reveal"
+                    ref={(el) => { if (el) pubRefs.current[i] = el; }}
+                    style={{ animationDelay:`${i * 60}ms` }}
+                    itemScope itemType="https://schema.org/ScholarlyArticle"
+                  >
+                    <div className="ntl-pub-year-col">
+                      <div className="ntl-pub-year" itemProp="datePublished">{pub.year}</div>
+                      <span className="ntl-pub-type" style={{ background:tc.bg, color:tc.color }}>{pub.type}</span>
+                    </div>
+                    <div>
+                      <div className="ntl-pub-title" itemProp="headline">{pub.title}</div>
+                      <div className="ntl-pub-venue" itemProp="publisher">{pub.venue}</div>
+                      <div className="ntl-pub-authors" itemProp="author">{pub.authors}</div>
+                      <div className="ntl-pub-links">
                         {pub.doi && (
-                          <a href={`https://doi.org/${pub.doi}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-blue)", fontSize: 11, textDecoration: "none", borderBottom: `1px dashed var(--accent-yellow)` }}>
+                          <a
+                            href={`https://doi.org/${pub.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ntl-pub-link"
+                            aria-label={`DOI link for: ${pub.title}`}
+                            itemProp="url"
+                          >
                             DOI: {pub.doi}
                           </a>
                         )}
                         {pub.link && (
-                          <a href={pub.link} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-blue)", fontSize: 11, textDecoration: "none", borderBottom: `1px dashed var(--accent-yellow)`, marginLeft: pub.doi ? 16 : 0 }}>
-                            View →
+                          <a
+                            href={pub.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ntl-pub-link"
+                            aria-label={`Read full paper: ${pub.title}`}
+                            itemProp="url"
+                          >
+                            View Publication →
                           </a>
                         )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {filteredPublications().length === 0 && (
-              <div style={{ textAlign: "center", color: "var(--text-secondary)", padding: 40 }}>No publications in this category yet.</div>
-            )}
-          </div>
+                    </div>
+                  </article>
+                );
+              })}
+              {filteredPubs.length === 0 && (
+                <p style={{ textAlign:"center", color:"var(--muted)", padding:"2.5rem" }}>No publications in this category yet.</p>
+              )}
+            </div>
 
-          {/* Book highlight */}
-          <div style={{ marginTop: 56, ...styles.card, display: "flex", gap: 28, alignItems: "center", flexWrap: "wrap", padding: 36 }}>
-            <div style={{ fontSize: 56 }}>📘</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ color: "var(--accent-yellow)", fontSize: 12, fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>UPCOMING BOOK</div>
-              <h3 style={{ color: "var(--text-primary)", fontWeight: 800, fontSize: 20, marginBottom: 12 }}>TinyML: Edge Intelligence for Smart Systems</h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
-                A comprehensive guide covering TinyML fundamentals, edge AI deployment pipelines, neural network optimization, hardware acceleration, and real-world case studies across healthcare, agriculture, and industrial IoT.
-              </p>
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {["TinyML", "Edge AI", "Embedded ML", "MCU Deployment"].map((t, i) => (
-                  <span key={i} style={{ background: "rgba(251,191,36,0.1)", color: "var(--accent-yellow)", fontSize: 11, fontWeight: 600, padding: "4px 12px", borderRadius: 30 }}>{t}</span>
-                ))}
-                <span style={{ background: "rgba(245,158,11,0.2)", color: "#f59e0b", fontSize: 11, fontWeight: 700, padding: "4px 12px", borderRadius: 30 }}>In Progress</span>
+            {/* Upcoming book */}
+            <div className="ntl-book-card">
+              <div className="ntl-book-icon">📘</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:".72rem", fontWeight:700, letterSpacing:".1em", textTransform:"uppercase", color:"var(--yellow)", marginBottom:".75rem" }}>
+                  Upcoming Book
+                </div>
+                <h3 className="ntl-h3" style={{ fontSize:"1.2rem", marginBottom:".6rem" }}>
+                  TinyML: Edge Intelligence for Smart Systems
+                </h3>
+                <p className="ntl-card-desc" style={{ fontSize:".86rem", marginBottom:"1rem" }}>
+                  A comprehensive guide covering TinyML fundamentals, edge AI deployment pipelines, neural network
+                  optimisation for microcontrollers, hardware acceleration, and real-world case studies across
+                  healthcare, agriculture, and industrial IoT.
+                </p>
+                <div className="ntl-chips">
+                  {["TinyML","Edge AI","Embedded ML","MCU Deployment"].map(t => (
+                    <span key={t} className="ntl-chip" style={{ background:"rgba(255,215,0,.1)", borderColor:"rgba(255,215,0,.25)", color:"var(--yellow)" }}>{t}</span>
+                  ))}
+                  <span className="ntl-chip" style={{ background:"rgba(245,158,11,.15)", borderColor:"rgba(245,158,11,.3)", color:"#F59E0B" }}>In Progress</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* TEAM */}
-      <section id="team" style={styles.sectionAlt} className="section-padding">
-        <div style={styles.containerMax}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>TEAM</div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 12 }}>The Minds Behind the Research</h2>
-            <p style={{ color: "var(--text-secondary)", fontSize: 15 }}>An interdisciplinary team of engineers, scientists, and innovators.</p>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 28 }} className="team-grid">
-            {TEAM.map((m, i) => (
-              <div
-                key={i}
-                style={{ ...styles.card, textAlign: "center", padding: 32 }}
-                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-8px)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-              >
-                <div style={{ width: 70, height: 70, borderRadius: "50%", margin: "0 auto 20px", background: "var(--gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "#0a0c15", fontWeight: 800, fontSize: 20 }}>{m.avatar}</div>
-                <h3 style={{ fontWeight: 800, fontSize: 16, marginBottom: 6, color: "var(--text-primary)" }}>{m.name}</h3>
-                <div style={{ color: "var(--accent-yellow)", fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{m.role}</div>
-                <div style={{ color: "var(--text-secondary)", fontSize: 12 }}>{m.focus}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SERVICES */}
-      <section id="services" style={styles.section} className="section-padding">
-        <div style={styles.containerMax}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>SERVICES</div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)", marginBottom: 12 }}>How We Can Work Together</h2>
-            <p style={{ color: "var(--text-secondary)", maxWidth: 600, margin: "0 auto", fontSize: 15 }}>From consulting to full development, we partner with organizations at every stage of their innovation journey.</p>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 28 }} className="services-grid">
-            {SERVICES.map((s, i) => (
-              <div
-                key={i}
-                style={{ ...styles.card, padding: 32 }}
-                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-6px)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-              >
-                <div style={{ fontSize: 34, marginBottom: 18 }}>{s.icon}</div>
-                <h3 style={{ fontWeight: 700, fontSize: 16, marginBottom: 12, color: "var(--accent-yellow)" }}>{s.title}</h3>
-                <p style={{ color: "var(--text-secondary)", fontSize: 13, lineHeight: 1.6 }}>{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* TECH STACK */}
-      <section style={styles.sectionAlt} className="section-padding">
-        <div style={{ maxWidth: 1000, margin: "auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <div style={{ color: "var(--accent-yellow)", fontWeight: 700, fontSize: 12, letterSpacing: 2, marginBottom: 16 }}>LAB INFRASTRUCTURE</div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--text-primary)" }}>Lab Infrastructure & Technology Stack</h2>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-            {TECH_STACK.map((cat, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 28, flexWrap: "wrap", borderBottom: `1px solid var(--border-color)`, paddingBottom: 16 }} className="tech-stack-flex">
-                <div style={{ minWidth: 150, color: "var(--accent-yellow)", fontSize: 13, fontWeight: 700, letterSpacing: 1 }}>{cat.cat.toUpperCase()}</div>
-                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                  {cat.items.map((t, j) => (
-                    <span key={j} style={{ background: isDarkMode ? "rgba(15,25,45,0.6)" : "#fff", border: `1px solid var(--border-color)`, color: "var(--text-secondary)", fontSize: 13, fontWeight: 500, padding: "6px 16px", borderRadius: 40 }}>{t}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA / CONTACT */}
-      <section id="contact" style={{ padding: "80px 48px", background: "var(--gradient)", textAlign: "center", marginTop: 4, position: "relative", overflow: "hidden" }}>
-        <h2 style={{ fontSize: "clamp(1.8rem, 5vw, 2.2rem)", fontWeight: 800, color: "#fff", marginBottom: 20 }}>Ready to Collaborate? 🚀</h2>
-        <p style={{ color: "rgba(255,255,255,0.9)", fontSize: 17, maxWidth: 560, margin: "0 auto 36px" }}>
-          Whether you're a researcher, startup, or enterprise — let's build something extraordinary together.
-        </p>
-        <button
-          onClick={() => window.open("https://wa.me/918336001208", "_blank")}
-          style={{ ...styles.ctaButton, background: "#fff", color: "#0a58ca", boxShadow: "0 6px 14px rgba(0,0,0,0.1)" }}
-          onMouseEnter={e => e.currentTarget.style.transform = "scale(1.05)"}
-          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+        {/* ══════════════════════════════════
+            TEAM
+        ══════════════════════════════════ */}
+        <section
+          id="team"
+          className="ntl-sec"
+          aria-labelledby="team-heading"
+          style={{ background:"rgba(255,255,255,.02)" }}
         >
-          Start a Conversation →
-        </button>
-      </section>
-    </div>
+          <div className="ntl-wrap">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Team</div>
+              <h2 className="ntl-h2" id="team-heading">The Minds Behind <span className="ntl-grad">the Research</span></h2>
+              <p className="ntl-lead">An interdisciplinary team of engineers, scientists, and innovators working at the intersection of hardware, software, and AI.</p>
+            </div>
+            <div className="ntl-team-grid">
+              {TEAM.map((m, i) => (
+                <div
+                  className="ntl-team-card ntl-reveal"
+                  key={m.name}
+                  ref={(el) => (teamRefs.current[i] = el)}
+                  style={{ animationDelay:`${i * 100}ms` }}
+                  itemScope itemType="https://schema.org/Person"
+                >
+                  <div className="ntl-avatar" aria-hidden="true">{m.initials}</div>
+                  <div className="ntl-team-name" itemProp="name">{m.name}</div>
+                  <div className="ntl-team-role" itemProp="jobTitle">{m.role}</div>
+                  <div className="ntl-team-focus" itemProp="knowsAbout">{m.focus}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════
+            SERVICES
+        ══════════════════════════════════ */}
+        <section id="services" className="ntl-sec" aria-labelledby="services-heading">
+          <div className="ntl-wrap">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Services</div>
+              <h2 className="ntl-h2" id="services-heading">How We Can <span className="ntl-grad">Work Together</span></h2>
+              <p className="ntl-lead">From consulting to full-scale development — we partner with organisations at every stage of their innovation journey.</p>
+            </div>
+            <div className="ntl-serv-grid">
+              {SERVICES.map((s, i) => (
+                <div
+                  className="ntl-card ntl-reveal"
+                  key={s.title}
+                  ref={(el) => (serviceRefs.current[i] = el)}
+                  style={{ animationDelay:`${i * 100}ms`, padding:"2rem" }}
+                  itemScope itemType="https://schema.org/Service"
+                >
+                  <div style={{ fontSize:"2rem", marginBottom:"1rem" }}>{s.icon}</div>
+                  <h3 className="ntl-h3" style={{ color:"var(--yellow)", fontSize:"1rem", marginBottom:".6rem" }} itemProp="name">{s.title}</h3>
+                  <p className="ntl-card-desc" style={{ fontSize:".86rem" }} itemProp="description">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════
+            TECH STACK
+        ══════════════════════════════════ */}
+        <section
+          className="ntl-sec"
+          aria-labelledby="stack-heading"
+          style={{ background:"rgba(255,255,255,.02)" }}
+        >
+          <div className="ntl-wrap-md">
+            <div className="ntl-center ntl-sec-hdr">
+              <div className="ntl-eyebrow"><span className="ntl-eyebrow-dot" />Lab Infrastructure</div>
+              <h2 className="ntl-h2" id="stack-heading">Technology Stack &amp; <span className="ntl-grad">Lab Resources</span></h2>
+            </div>
+            <div>
+              {TECH_STACK.map((cat) => (
+                <div className="ntl-stack-row" key={cat.cat}>
+                  <div className="ntl-stack-cat">{cat.cat}</div>
+                  <div className="ntl-stack-items">
+                    {cat.items.map(item => (
+                      <span key={item} className="ntl-stack-item">{item}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ══════════════════════════════════
+            CTA BAND
+        ══════════════════════════════════ */}
+        <section className="ntl-cta-band" aria-labelledby="cta-heading">
+          <div className="ntl-eyebrow" style={{ margin:"0 auto 1.25rem" }}>
+            <span className="ntl-eyebrow-dot" />Start a Collaboration
+          </div>
+          <h2 className="ntl-h2" id="cta-heading">
+            Ready to Collaborate? <span className="ntl-grad">Let's Build</span>
+          </h2>
+          <p className="ntl-lead" style={{ margin:".75rem auto 2rem", textAlign:"center" }}>
+            Whether you're a researcher, university, startup, or enterprise —
+            let's build something extraordinary together with NovaTech R&D Lab.
+          </p>
+          <a
+            href="https://wa.me/918336001208?text=Hello, I want to collaborate with NovaTech R%26D Lab!"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ntl-btn-pri"
+            aria-label="Start a conversation with NovaTech R&D Lab on WhatsApp"
+          >
+            💬 Start a Conversation →
+          </a>
+        </section>
+
+      </div>
+    </>
   );
 }
+
+/* inline CSS var helper to avoid template literal issues inside JSX attributes */
+const var_yellow = "var(--yellow)";

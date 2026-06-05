@@ -16,11 +16,10 @@ import { Link, useLocation } from "react-router-dom";
    ───────────────────────────────────────────── */
 
 const NAV_LINKS = [
-  { to: "/", label: "Home" },
-  { to: "/about", label: "About Us" },
+  { to: "/",         label: "Home"     },
+  { to: "/about",    label: "About Us" },
   { to: "/features", label: "Services" },
-    { to: "/lab", label: "R&D Lab" },
-  { to: "/projects", label: "Projects" },
+  { to: "/pricing",  label: "Pricing"  },
 ];
 
 const Navbar = () => {
@@ -203,33 +202,67 @@ const Navbar = () => {
           color: var(--nt-yellow);
         }
 
-        /* ── CTA button ── */
-        .nt-cta {
+        /* ── CTA buttons wrapper ── */
+        .nt-cta-group {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-shrink: 0;
+        }
+
+        /* ── R&D Lab button (outline style) ── */
+        .nt-cta-outline {
           display: inline-flex;
           align-items: center;
-          gap: 0.45rem;
-          padding: 0.55rem 1.25rem;
-          background: var(--nt-yellow);
-          color: var(--nt-navy);
+          gap: 0.4rem;
+          padding: 0.5rem 1.1rem;
+          background: transparent;
+          color: var(--nt-yellow);
           font-family: var(--font-display);
-          font-size: 0.88rem;
+          font-size: 0.84rem;
           font-weight: 700;
           text-decoration: none;
           border-radius: 7px;
-          border: 2px solid transparent;
+          border: 1.5px solid rgba(255,215,0,0.55);
+          letter-spacing: 0.02em;
+          transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .nt-cta-outline:hover {
+          background: rgba(255,215,0,0.1);
+          border-color: var(--nt-yellow);
+          box-shadow: 0 0 14px rgba(255,215,0,0.2);
+          transform: translateY(-1px);
+        }
+
+        /* ── Get in Touch button (filled style) ── */
+        .nt-cta-filled {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.4rem;
+          padding: 0.5rem 1.1rem;
+          background: var(--nt-yellow);
+          color: var(--nt-navy);
+          font-family: var(--font-display);
+          font-size: 0.84rem;
+          font-weight: 700;
+          text-decoration: none;
+          border-radius: 7px;
+          border: 1.5px solid transparent;
           letter-spacing: 0.02em;
           transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
           white-space: nowrap;
           flex-shrink: 0;
         }
-        .nt-cta:hover {
+        .nt-cta-filled:hover {
           background: transparent;
           color: var(--nt-yellow);
           border-color: var(--nt-yellow);
           box-shadow: 0 0 18px rgba(255,215,0,0.28);
           transform: translateY(-1px);
         }
-        .nt-cta-icon { font-size: 0.95rem; }
+        .nt-cta-icon { font-size: 0.88rem; }
 
         /* ── Hamburger ── */
         .nt-burger {
@@ -389,7 +422,7 @@ const Navbar = () => {
           .nt-link { padding: 0.4rem 0.55rem; font-size: 0.85rem; }
         }
         @media (max-width: 860px) {
-          .nt-nav, .nt-cta { display: none !important; }
+          .nt-nav, .nt-cta-group { display: none !important; }
           .nt-burger { display: flex; }
           .nt-mobile-nav, .nt-mobile-overlay { display: flex; }
         }
@@ -419,11 +452,16 @@ const Navbar = () => {
             className="nt-logo"
             aria-label="NovaTech Innovative Solutions — Home"
           >
-          
-            <div className="nt-logo-text">
+            <img
+              src="/banner-logo.png"
+              alt="NovaTech Innovative Solutions "
+              loading="eager"
+              fetchpriority="high"
+            />
+            {/* <div className="nt-logo-text">
               <span>NovaTech</span>
               <span>Innovative Solutions</span>
-            </div>
+            </div> */}
           </Link>
 
           {/* ── Desktop Navigation ──
@@ -432,7 +470,7 @@ const Navbar = () => {
           <nav aria-label="Main navigation">
             <ul className="nt-nav" role="listitem">
               {NAV_LINKS.map(({ to, label }) => (
-                <li key={to}>
+                <li key={to} >
                   <Link
                     to={to}
                     className="nt-link"
@@ -445,17 +483,27 @@ const Navbar = () => {
             </ul>
           </nav>
 
-          {/* ── CTA ── descriptive anchor text = SEO + UX ── */}
-          <a
-            href="https://wa.me/918336001208?text=Hello, I need some help with my Project !"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nt-cta"
-            aria-label="Contact NovaTech on WhatsApp for project help"
-          >
-            <span className="nt-cta-icon">💬</span>
-            Get in Touch
-          </a>
+          {/* ── CTA Group — R&D Lab (outline) + Get in Touch (filled) ── */}
+          <div className="nt-cta-group" role="group" aria-label="Quick actions">
+            <Link
+              to="/lab"
+              className="nt-cta-outline"
+              aria-label="Visit NovaTech R&D Lab — AI, IoT and Embedded Systems Research"
+            >
+              <span className="nt-cta-icon" aria-hidden="true">🔬</span>
+              R&amp;D Lab
+            </Link>
+            <a
+              href="https://wa.me/918336001208?text=Hello, I need some help with my Project !"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nt-cta-filled"
+              aria-label="Contact NovaTech on WhatsApp for project help"
+            >
+              <span className="nt-cta-icon" aria-hidden="true">💬</span>
+              Get in Touch
+            </a>
+          </div>
 
           {/* ── Hamburger (mobile) ── */}
           <button
@@ -499,7 +547,7 @@ const Navbar = () => {
             aria-label="NovaTech — Home"
           >
             <img
-              src="https://raw.githubusercontent.com/NovaTech-Innovate-Solutions/NovaTech-Innovate-Solutions.github.io/refs/heads/main/logofianla-removebg-preview.png"
+              src="/banner-logo.png"
               alt="NovaTech Innovative Solutions"
               style={{ height: 40 }}
             />
@@ -536,8 +584,18 @@ const Navbar = () => {
 
         <hr className="nt-mobile-divider" />
 
-        {/* Drawer CTA */}
-        <div className="nt-mobile-cta-wrap">
+        {/* Drawer CTAs */}
+        <div className="nt-mobile-cta-wrap" style={{ display:"flex", flexDirection:"column", gap:"0.65rem" }}>
+          <Link
+            to="/lab"
+            className="nt-mobile-cta"
+            style={{ background:"transparent", border:"1.5px solid rgba(255,215,0,0.5)", color:"var(--nt-yellow)" }}
+            aria-label="Visit NovaTech R&D Lab"
+            onClick={() => setIsOpen(false)}
+          >
+            <span aria-hidden="true">🔬</span>
+            R&amp;D Lab
+          </Link>
           <a
             href="https://wa.me/918336001208?text=Hello, I need some help with my Project !"
             target="_blank"

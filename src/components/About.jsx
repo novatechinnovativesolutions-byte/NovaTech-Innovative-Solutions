@@ -466,7 +466,7 @@ const AboutUs = () => {
         "@context": "https://schema.org",
         "@type": ["Organization", "AboutPage"],
         "name": "NovaTech Innovative Solutions",
-        "url": "https://www.novatechinnovative.com/about",
+        "url": "https://www.novatech-is.in/about",
         "description": "NovaTech Innovative Solutions provides software development, hardware & IoT, AI projects, academic guidance, research support, and professional training workshops.",
         "founder": {
           "@type": "Person",
@@ -631,7 +631,7 @@ const AboutUs = () => {
               </div>
               <div className="ceo-socials" aria-label="Founder social links">
                 <a
-                  href="https://www.linkedin.com/in/chandramouli-haldar"
+                  href="https://www.linkedin.com/in/chandramouli01/"
                   className="ceo-social-btn"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -640,7 +640,7 @@ const AboutUs = () => {
                   <span style={{ display: "flex" }}>{Ic.linkedin}</span>
                 </a>
                 <a
-                  href="mailto:novatechinnovativesolution@gmail.com"
+                  href="mailto:chandramoulihaldar@gmail.com"
                   className="ceo-social-btn"
                   aria-label="Email NovaTech"
                 >
