@@ -484,15 +484,15 @@ const Footer = () => {
           {/* ── Bottom bar ── */}
           <div className="ntf-bottom">
             <p className="ntf-copy">
-              © {year}{" "}
-              <strong itemProp="legalName">NovaTech Innovative Solutions</strong>.
+              © {"2025 - "} {year} {" "}
+              <strong itemProp="legalName"> NovaTech Innovative Solutions</strong>.
               All rights reserved.
             </p>
 
             {/* Legal links — important for E-E-A-T trust signals */}
             <ul className="ntf-bottom-links">
-              <li><Link to="#">Privacy Policy</Link></li>
-              <li><Link to="#">Terms of Service</Link></li>
+              <li>  <Link to="/privacy-policy" target="_blank">Privacy Policy</Link></li>
+              <li><Link to="Terms-Of-Service" target="_blank">Terms of Service</Link></li>
               <li>
                 <address style={{ display: "inline", fontStyle: "normal" }}>
                   {/* <address> tag boosts local SEO */}

@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -12,17 +17,20 @@ import Career from "./components/Carrer";
 import Pricing from "./components/Pricing";
 import NovaTechLab from "./components/NovaTechLab";
 import Projectmaker from "./components/projectmaker";
+import PrivacyPolicy from "./components/PrivacyPolicy";
+import TermsOfService from "./components/TermsOfService";
 
-// 🔥 Layout Wrapper
 const Layout = () => {
   const location = useLocation();
 
-  // ❗ Hide ONLY Navbar on Lab page
-  const hideNavbar = location.pathname === "/lab";
+  // Pages where Navbar/Footer should be hidden
+  const hiddenLayoutPages = ["/lab"];
+
+  const hideLayout = hiddenLayoutPages.includes(location.pathname);
 
   return (
     <>
-      {!hideNavbar && <Navbar />}
+      {!hideLayout && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -31,24 +39,48 @@ const Layout = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career />} />
         <Route path="/pricing" element={<Pricing />} />
+
+        {/* Privacy Policy */}
+        <Route  path="/privacy-policy" element={<PrivacyPolicy />}
+        />
+
+          {/* Terms Of Service */}
+        <Route  path="/Terms-Of-Service" element={<TermsOfService />}
+        />
+
         <Route path="/projectmaker" element={<Projectmaker />} />
 
-        {/* ✅ R&D Lab */}
+        {/* NovaTech Lab */}
         <Route path="/lab" element={<NovaTechLab />} />
+
+        {/* 404 Page */}
+        <Route
+          path="*"
+          element={
+            <div
+              style={{
+                padding: "100px 20px",
+                textAlign: "center",
+              }}
+            >
+              <h1>404</h1>
+              <p>Page Not Found</p>
+            </div>
+          }
+        />
       </Routes>
 
-      {/* ✅ Footer ALWAYS visible */}
-      <Footer />
+      {!hideLayout && <Footer />}
     </>
   );
 };
 
-const App = () => {
+function App() {
   return (
     <Router>
       <Layout />
     </Router>
   );
-};
+}
 
 export default App;
