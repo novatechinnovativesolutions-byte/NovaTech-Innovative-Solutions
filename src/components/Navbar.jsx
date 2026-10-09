@@ -2,56 +2,58 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 /* ─────────────────────────────────────────────
-   NovaTech Innovative Solutions — SEO Navbar
-   ─────────────────────────────────────────────
-   SEO Layers:
-   • <header> with role="banner" (ARIA landmark — search engines use landmarks)
-   • <nav> with aria-label="Main navigation" (helps Google understand page structure)
-   • All links have descriptive text (no "click here")
-   • Active link marked with aria-current="page" (accessibility + Googlebot signal)
-   • Logo img has keyword-rich alt text
-   • Structured links use exact service keywords for internal anchor text SEO
-   • rel="noopener noreferrer" on external links (security + SEO hygiene)
-   • Sticky nav keeps brand signals in viewport (reduces bounce rate)
+   NovaTech Innovative Solutions — Navbar (light theme)
+   Same tokens as the R&D services page: navy text, electric blue
+   accent, yellow call-to-action, Syne + DM Sans.
+   Logo files go in /public:  logo-nav.png  (wordmark, transparent)
+   SEO / a11y: <header> banner landmark, labelled <nav>s, aria-current
+   on the active link, descriptive alt text, real <a> links,
+   closed mobile drawer is hidden from keyboard and screen readers.
    ───────────────────────────────────────────── */
 
 const NAV_LINKS = [
-  { to: "/",         label: "Home"     },
-  { to: "/about",    label: "About Us" },
-  { to: "/features", label: "Services" },
-  { to: "/pricing",  label: "Pricing"  },
+  { to: "/",                         label: "Home"         },
+  { to: "/about",                    label: "About Us"     },
+  { to: "/features",                 label: "Services"     },
+
+  { to: "/Training",                  label: "Training"      },
+  { to: "/lab",                      label: "R&D Services" },
 ];
+
+const WA_URL = `https://wa.me/918336001208?text=${encodeURIComponent("Hello, I need some help with my Project!")}`;
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
-  const navRef = useRef(null);
+  const headerRef = useRef(null);
+  const drawerRef = useRef(null);
 
-  /* ── Scroll shadow ── */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* ── Close mobile menu on route change ── */
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setIsOpen(false); }, [location.pathname]);
 
-  /* ── Close mobile menu on outside click ── */
+  /* Close on outside click (header and drawer both count as "inside") and on Escape */
   useEffect(() => {
-    const handler = (e) => {
-      if (navRef.current && !navRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
+    const onDown = (e) => {
+      const inside = (headerRef.current && headerRef.current.contains(e.target)) ||
+                     (drawerRef.current && drawerRef.current.contains(e.target));
+      if (!inside) setIsOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    const onKey = (e) => e.key === "Escape" && setIsOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
   }, []);
 
-  /* ── Lock body scroll when mobile menu open ── */
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -62,420 +64,155 @@ const Navbar = () => {
 
   return (
     <>
-      {/* ── Inject fonts + keyframes once ── */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap');
 
         :root {
-          --nt-navy:   #0B1F4A;
-          --nt-blue:   #1E3A8A;
-          --nt-sky:    #2563EB;
-          --nt-yellow: #FFD700;
-          --nt-gold:   #F59E0B;
-          --nt-white:  #FFFFFF;
-          --nt-glass:  rgba(255,255,255,0.06);
-          --nt-border: rgba(255,255,255,0.10);
-          --nt-shadow: 0 8px 32px rgba(11,31,74,0.45);
+          --nt-navy:   #0A0F2E;
+          --nt-blue:   #1346E8;
+          --nt-blue-l: #EEF3FF;
+          --nt-yellow: #FFC800;
+          --nt-text:   #1B2140;
+          --nt-muted:  #5B6482;
+          --nt-border: #E3E8F5;
           --font-display: 'Syne', sans-serif;
           --font-body:    'DM Sans', sans-serif;
           --nav-h: 68px;
         }
 
-        /* ── Base Reset ── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ── Navbar wrapper ── */
+        /* ── Header (sticky, height = --nav-h so page tabs can sit right under it) ── */
         .nt-header {
-          position: sticky;
-          top: 0;
-          z-index: 1000;
-          background: var(--nt-navy);
+          position: sticky; top: 0; z-index: 1000;
+          background: rgba(255,255,255,0.96);
+          backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
           border-bottom: 1px solid var(--nt-border);
-          transition: box-shadow 0.3s ease, background 0.3s ease;
           font-family: var(--font-body);
+          transition: box-shadow .25s ease;
         }
-        .nt-header.scrolled {
-          background: rgba(11,31,74,0.97);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-          box-shadow: var(--nt-shadow);
-        }
-
-        /* ── Top accent bar ── */
-        .nt-accent-bar {
-          height: 3px;
-          background: linear-gradient(90deg, var(--nt-sky) 0%, var(--nt-yellow) 60%, var(--nt-gold) 100%);
+        .nt-header.scrolled { box-shadow: 0 8px 28px rgba(19,70,232,0.10); }
+        /* brand accent line sits on top edge without adding height */
+        .nt-header::before {
+          content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+          background: linear-gradient(90deg, var(--nt-blue), var(--nt-yellow));
         }
 
-        /* ── Inner container ── */
         .nt-container {
-          max-width: 1280px;
-          margin: 0 auto;
-          padding: 0 1.5rem;
+          max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;
           height: var(--nav-h);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
+          display: flex; align-items: center; justify-content: space-between; gap: 1rem;
         }
 
         /* ── Logo ── */
-        .nt-logo {
-          display: flex;
-          align-items: center;
-          gap: 0.65rem;
-          text-decoration: none;
-          flex-shrink: 0;
-        }
-        .nt-logo img {
-          height: 46px;
-          width: auto;
-          object-fit: contain;
-          filter: drop-shadow(0 2px 6px rgba(255,215,0,0.25));
-          transition: filter 0.3s ease;
-        }
-        .nt-logo:hover img { filter: drop-shadow(0 4px 14px rgba(255,215,0,0.5)); }
-        .nt-logo-text {
-          display: flex;
-          flex-direction: column;
-          line-height: 1.15;
-        }
-        .nt-logo-text span:first-child {
-          font-family: var(--font-display);
-          font-size: 1.05rem;
-          font-weight: 800;
-          color: var(--nt-white);
-          letter-spacing: 0.02em;
-        }
-        .nt-logo-text span:last-child {
-          font-size: 0.62rem;
-          font-weight: 500;
-          color: var(--nt-yellow);
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
+        .nt-logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+        .nt-logo img { height: 46px; width: auto; display: block; }
 
-        /* ── Desktop nav list ── */
-        .nt-nav {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          list-style: none;
-        }
-
-        /* ── Nav link ── */
+        /* ── Desktop links ── */
+        .nt-nav { display: flex; align-items: center; gap: .25rem; list-style: none; }
         .nt-link {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          padding: 0.45rem 0.75rem;
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: rgba(255,255,255,0.78);
-          text-decoration: none;
-          border-radius: 6px;
-          transition: color 0.2s ease, background 0.2s ease;
-          white-space: nowrap;
+          display: inline-flex; align-items: center;
+          padding: .5rem .85rem; border-radius: 8px;
+          font-size: .92rem; font-weight: 500; color: var(--nt-navy);
+          text-decoration: none; white-space: nowrap;
+          transition: background .2s ease, color .2s ease;
         }
-        .nt-link::after {
-          content: '';
-          position: absolute;
-          bottom: 4px;
-          left: 50%;
-          transform: translateX(-50%) scaleX(0);
-          width: 60%;
-          height: 2px;
-          background: var(--nt-yellow);
-          border-radius: 2px;
-          transition: transform 0.25s ease;
-        }
-        .nt-link:hover,
-        .nt-link[aria-current="page"] {
-          color: var(--nt-white);
-          background: var(--nt-glass);
-        }
-        .nt-link:hover::after,
-        .nt-link[aria-current="page"]::after {
-          transform: translateX(-50%) scaleX(1);
-        }
-        .nt-link[aria-current="page"] {
-          color: var(--nt-yellow);
-        }
+        .nt-link:hover { background: var(--nt-blue-l); }
+        .nt-link[aria-current="page"] { background: var(--nt-blue-l); color: var(--nt-blue); font-weight: 700; }
 
-        /* ── CTA buttons wrapper ── */
-        .nt-cta-group {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          flex-shrink: 0;
+        /* ── CTAs ── */
+        .nt-cta-group { display: flex; align-items: center; gap: .6rem; flex-shrink: 0; }
+        .nt-cta-outline, .nt-cta-filled {
+          display: inline-flex; align-items: center; gap: .4rem;
+          padding: .5rem 1.1rem; border-radius: 8px;
+          font-family: var(--font-display); font-size: .85rem; font-weight: 700;
+          text-decoration: none; white-space: nowrap; flex-shrink: 0;
+          transition: transform .15s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
         }
+        .nt-cta-outline { border: 2px solid var(--nt-navy); color: var(--nt-navy); background: transparent; }
+        .nt-cta-outline:hover { background: var(--nt-navy); color: #fff; transform: translateY(-1px); }
+        .nt-cta-filled { border: 2px solid var(--nt-yellow); background: var(--nt-yellow); color: var(--nt-navy); }
+        .nt-cta-filled:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(255,200,0,.45); }
+        .nt-link:focus-visible, .nt-cta-outline:focus-visible, .nt-cta-filled:focus-visible,
+        .nt-burger:focus-visible, .nt-mobile-link:focus-visible, .nt-mobile-close:focus-visible,
+        .nt-logo:focus-visible { outline: 3px solid var(--nt-yellow); outline-offset: 3px; }
 
-        /* ── R&D Lab button (outline style) ── */
-        .nt-cta-outline {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-          padding: 0.5rem 1.1rem;
-          background: transparent;
-          color: var(--nt-yellow);
-          font-family: var(--font-display);
-          font-size: 0.84rem;
-          font-weight: 700;
-          text-decoration: none;
-          border-radius: 7px;
-          border: 1.5px solid rgba(255,215,0,0.55);
-          letter-spacing: 0.02em;
-          transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .nt-cta-outline:hover {
-          background: rgba(255,215,0,0.1);
-          border-color: var(--nt-yellow);
-          box-shadow: 0 0 14px rgba(255,215,0,0.2);
-          transform: translateY(-1px);
-        }
-
-        /* ── Get in Touch button (filled style) ── */
-        .nt-cta-filled {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.4rem;
-          padding: 0.5rem 1.1rem;
-          background: var(--nt-yellow);
-          color: var(--nt-navy);
-          font-family: var(--font-display);
-          font-size: 0.84rem;
-          font-weight: 700;
-          text-decoration: none;
-          border-radius: 7px;
-          border: 1.5px solid transparent;
-          letter-spacing: 0.02em;
-          transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .nt-cta-filled:hover {
-          background: transparent;
-          color: var(--nt-yellow);
-          border-color: var(--nt-yellow);
-          box-shadow: 0 0 18px rgba(255,215,0,0.28);
-          transform: translateY(-1px);
-        }
-        .nt-cta-icon { font-size: 0.88rem; }
-
-        /* ── Hamburger ── */
+        /* ── Burger ── */
         .nt-burger {
-          display: none;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          width: 42px;
-          height: 42px;
-          background: var(--nt-glass);
-          border: 1px solid var(--nt-border);
-          border-radius: 8px;
-          cursor: pointer;
-          gap: 5px;
-          flex-shrink: 0;
-          transition: background 0.2s ease;
+          display: none; flex-direction: column; justify-content: center; align-items: center; gap: 5px;
+          width: 42px; height: 42px; flex-shrink: 0; cursor: pointer;
+          background: #fff; border: 1px solid var(--nt-border); border-radius: 8px;
         }
-        .nt-burger:hover { background: rgba(255,255,255,0.12); }
-        .nt-burger span {
-          display: block;
-          width: 22px;
-          height: 2px;
-          background: var(--nt-white);
-          border-radius: 2px;
-          transition: transform 0.3s ease, opacity 0.3s ease;
-          transform-origin: center;
-        }
+        .nt-burger span { display: block; width: 22px; height: 2px; background: var(--nt-navy); border-radius: 2px; transition: transform .3s ease, opacity .3s ease; }
         .nt-burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .nt-burger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .nt-burger.open span:nth-child(2) { opacity: 0; }
         .nt-burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-        /* ── Mobile overlay ── */
+        /* ── Mobile overlay + drawer ── */
         .nt-mobile-overlay {
-          display: none;
-          position: fixed;
-          inset: 0;
-          background: rgba(11,31,74,0.0);
-          z-index: 998;
-          transition: background 0.3s ease;
-          pointer-events: none;
+          display: none; position: fixed; inset: 0; z-index: 998;
+          background: rgba(10,15,46,0); pointer-events: none; transition: background .3s ease;
         }
-        .nt-mobile-overlay.open {
-          background: rgba(11,31,74,0.75);
-          pointer-events: all;
-        }
-
-        /* ── Mobile drawer ── */
+        .nt-mobile-overlay.open { background: rgba(10,15,46,.55); pointer-events: all; }
         .nt-mobile-nav {
-          display: none;
-          position: fixed;
-          top: 0;
-          right: 0;
-          width: min(88vw, 340px);
-          height: 100dvh;
-          background: var(--nt-navy);
-          border-left: 1px solid var(--nt-border);
-          box-shadow: -8px 0 40px rgba(0,0,0,0.4);
-          z-index: 999;
-          flex-direction: column;
-          transform: translateX(100%);
-          transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-          overflow-y: auto;
+          display: none; position: fixed; top: 0; right: 0; z-index: 999;
+          width: min(88vw, 340px); height: 100dvh; overflow-y: auto; flex-direction: column;
+          background: #fff; border-left: 1px solid var(--nt-border);
+          box-shadow: -8px 0 40px rgba(10,15,46,.18);
+          transform: translateX(100%); visibility: hidden;
+          transition: transform .35s cubic-bezier(.4,0,.2,1), visibility 0s linear .35s;
+          font-family: var(--font-body);
         }
-        .nt-mobile-nav.open { transform: translateX(0); }
-
-        .nt-mobile-top {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 1.25rem 1.5rem;
-          border-bottom: 1px solid var(--nt-border);
-        }
+        .nt-mobile-nav.open { transform: translateX(0); visibility: visible; transition-delay: 0s; }
+        .nt-mobile-top { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--nt-border); }
         .nt-mobile-close {
-          background: none;
-          border: 1px solid var(--nt-border);
-          color: var(--nt-white);
-          width: 36px;
-          height: 36px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 1.1rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.2s ease;
+          width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+          background: #fff; color: var(--nt-navy); border: 1px solid var(--nt-border); border-radius: 8px; cursor: pointer; font-size: 1rem;
         }
-        .nt-mobile-close:hover { background: var(--nt-glass); }
-
-        .nt-mobile-links {
-          list-style: none;
-          padding: 1rem 1rem 0.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
+        .nt-mobile-links { list-style: none; padding: 1rem; display: flex; flex-direction: column; gap: .25rem; }
         .nt-mobile-link {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0.85rem 1rem;
-          border-radius: 8px;
-          color: rgba(255,255,255,0.8);
-          font-size: 1rem;
-          font-weight: 500;
-          text-decoration: none;
-          transition: background 0.2s ease, color 0.2s ease;
+          display: flex; align-items: center; justify-content: space-between;
+          padding: .85rem 1rem; border-radius: 8px;
+          color: var(--nt-navy); font-size: 1rem; font-weight: 500; text-decoration: none;
+          transition: background .2s ease, color .2s ease;
         }
-        .nt-mobile-link:hover,
-        .nt-mobile-link[aria-current="page"] {
-          background: var(--nt-glass);
-          color: var(--nt-white);
-        }
-        .nt-mobile-link[aria-current="page"] { color: var(--nt-yellow); }
-        .nt-mobile-link-arrow { font-size: 0.75rem; opacity: 0.45; }
+        .nt-mobile-link:hover { background: var(--nt-blue-l); }
+        .nt-mobile-link[aria-current="page"] { background: var(--nt-blue-l); color: var(--nt-blue); font-weight: 700; }
+        .nt-mobile-arrow { font-size: .8rem; opacity: .5; }
+        .nt-mobile-divider { margin: .25rem 1.5rem; border: none; border-top: 1px solid var(--nt-border); }
+        .nt-mobile-cta-wrap { padding: 1rem 1.5rem 1.5rem; display: flex; flex-direction: column; gap: .65rem; }
+        .nt-mobile-cta { justify-content: center; width: 100%; padding: .85rem 1rem; font-size: .95rem; }
+        .nt-mobile-tagline { padding: 0 1.5rem 1.5rem; font-size: .78rem; color: var(--nt-muted); text-align: center; }
 
-        .nt-mobile-cta-wrap {
-          padding: 1rem 1.5rem 2rem;
-        }
-        .nt-mobile-cta {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 0.5rem;
-          width: 100%;
-          padding: 0.9rem 1rem;
-          background: var(--nt-yellow);
-          color: var(--nt-navy);
-          font-family: var(--font-display);
-          font-size: 0.95rem;
-          font-weight: 700;
-          text-decoration: none;
-          border-radius: 8px;
-          letter-spacing: 0.03em;
-          transition: background 0.2s ease, box-shadow 0.2s ease;
-        }
-        .nt-mobile-cta:hover {
-          background: var(--nt-gold);
-          box-shadow: 0 4px 20px rgba(255,215,0,0.3);
-        }
-
-        .nt-mobile-divider {
-          margin: 0.5rem 1.5rem;
-          border: none;
-          border-top: 1px solid var(--nt-border);
-        }
-
-        .nt-mobile-tagline {
-          padding: 0 1.5rem 1rem;
-          font-size: 0.75rem;
-          color: rgba(255,255,255,0.35);
-          font-style: italic;
-          text-align: center;
-        }
-
-        /* ── Responsive breakpoints ── */
-        @media (max-width: 1024px) {
-          .nt-link { padding: 0.4rem 0.55rem; font-size: 0.85rem; }
-        }
-        @media (max-width: 860px) {
+        /* ── Responsive ── */
+        @media (max-width: 1100px) { .nt-link { padding: .45rem .6rem; font-size: .88rem; } }
+        @media (max-width: 960px)  {
           .nt-nav, .nt-cta-group { display: none !important; }
           .nt-burger { display: flex; }
           .nt-mobile-nav, .nt-mobile-overlay { display: flex; }
         }
-        @media (max-width: 400px) {
-          .nt-logo-text { display: none; }
-        }
+        @media (max-width: 400px) { .nt-logo img { height: 38px; } }
+        @media (prefers-reduced-motion: reduce) { .nt-header *, .nt-mobile-nav, .nt-mobile-overlay { transition: none !important; } }
       `}</style>
 
-      {/* ═══════════════════════════════════════════
-          HEADER — role="banner" signals page header
-          to search engines and screen readers
-      ═══════════════════════════════════════════ */}
-      <header
-        className={`nt-header${scrolled ? " scrolled" : ""}`}
-        role="banner"
-        ref={navRef}
-      >
-        {/* Gradient accent line — brand identity signal */}
-        <div className="nt-accent-bar" aria-hidden="true" />
-
+      <header className={`nt-header${scrolled ? " scrolled" : ""}`} role="banner" ref={headerRef}>
         <div className="nt-container">
-
-          {/* ── Logo ── */}
-          {/* alt text includes brand name + core keywords for image SEO */}
-          <Link
-            to="/"
-            className="nt-logo"
-            aria-label="NovaTech Innovative Solutions — Home"
-          >
+          <Link to="/" className="nt-logo" aria-label="NovaTech Innovative Solutions — Home">
             <img
-              src="/banner-logo.png"
-              alt="NovaTech Innovative Solutions "
+              src="/logo-nav.png"
+              alt="NovaTech Innovative Solutions"
+              width="60"
+              height="auto"
               loading="eager"
               fetchpriority="high"
             />
-            {/* <div className="nt-logo-text">
-              <span>NovaTech</span>
-              <span>Innovative Solutions</span>
-            </div> */}
           </Link>
 
-          {/* ── Desktop Navigation ──
-              <nav> + aria-label enables Google to parse
-              the navigation landmark separately from content */}
           <nav aria-label="Main navigation">
-            <ul className="nt-nav" role="listitem">
+            <ul className="nt-nav">
               {NAV_LINKS.map(({ to, label }) => (
-                <li key={to} >
-                  <Link
-                    to={to}
-                    className="nt-link"
-                    aria-current={isActive(to) ? "page" : undefined}
-                  >
+                <li key={to}>
+                  <Link to={to} className="nt-link" aria-current={isActive(to) ? "page" : undefined}>
                     {label}
                   </Link>
                 </li>
@@ -483,29 +220,15 @@ const Navbar = () => {
             </ul>
           </nav>
 
-          {/* ── CTA Group — R&D Lab (outline) + Get in Touch (filled) ── */}
           <div className="nt-cta-group" role="group" aria-label="Quick actions">
-            <Link
-              to="/lab"
-              className="nt-cta-outline"
-              aria-label="Visit NovaTech R&D Lab — AI, IoT and Embedded Systems Research"
-            >
-              <span className="nt-cta-icon" aria-hidden="true">🔬</span>
-              R&amp;D Lab
-            </Link>
-            <a
-              href="https://wa.me/918336001208?text=Hello, I need some help with my Project !"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nt-cta-filled"
-              aria-label="Contact NovaTech on WhatsApp for project help"
-            >
-              <span className="nt-cta-icon" aria-hidden="true">💬</span>
-              Get in Touch
+            {/* <Link to="/lab" className="nt-cta-outline" aria-label="Visit NovaTech R&D Lab — AI, IoT and Embedded Systems Research">
+              <span aria-hidden="true">🔬</span>R&amp;D Lab
+            </Link> */}
+            <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="nt-cta-filled" aria-label="Contact NovaTech on WhatsApp for project help">
+              <span aria-hidden="true">💬</span>Get in Touch
             </a>
           </div>
 
-          {/* ── Hamburger (mobile) ── */}
           <button
             className={`nt-burger${isOpen ? " open" : ""}`}
             onClick={() => setIsOpen((o) => !o)}
@@ -513,70 +236,26 @@ const Navbar = () => {
             aria-expanded={isOpen}
             aria-controls="nt-mobile-menu"
           >
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
-            <span aria-hidden="true" />
+            <span aria-hidden="true" /><span aria-hidden="true" /><span aria-hidden="true" />
           </button>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════
-          MOBILE OVERLAY + DRAWER
-          (rendered outside header so it covers
-           the full viewport; hidden from crawlers
-           via aria-hidden when closed)
-      ═══════════════════════════════════════ */}
-      <div
-        className={`nt-mobile-overlay${isOpen ? " open" : ""}`}
-        onClick={() => setIsOpen(false)}
-        aria-hidden="true"
-      />
+      <div className={`nt-mobile-overlay${isOpen ? " open" : ""}`} onClick={() => setIsOpen(false)} aria-hidden="true" />
 
-      <nav
-        id="nt-mobile-menu"
-        className={`nt-mobile-nav${isOpen ? " open" : ""}`}
-        aria-label="Mobile navigation"
-        aria-hidden={!isOpen}
-      >
-        {/* Drawer header */}
+      <nav id="nt-mobile-menu" ref={drawerRef} className={`nt-mobile-nav${isOpen ? " open" : ""}`} aria-label="Mobile navigation" aria-hidden={!isOpen}>
         <div className="nt-mobile-top">
-          <Link
-            to="/"
-            className="nt-logo"
-            onClick={() => setIsOpen(false)}
-            aria-label="NovaTech — Home"
-          >
-            <img
-              src="/banner-logo.png"
-              alt="NovaTech Innovative Solutions"
-              style={{ height: 40 }}
-            />
-            <div className="nt-logo-text">
-              <span>NovaTech</span>
-              <span>Innovative Solutions</span>
-            </div>
+          <Link to="/" className="nt-logo" onClick={() => setIsOpen(false)} aria-label="NovaTech — Home">
+            <img src="/logo-nav.png" alt="NovaTech Innovative Solutions" width="122" height="39" style={{ height: 39 }} />
           </Link>
-          <button
-            className="nt-mobile-close"
-            onClick={() => setIsOpen(false)}
-            aria-label="Close menu"
-          >
-            ✕
-          </button>
+          <button className="nt-mobile-close" onClick={() => setIsOpen(false)} aria-label="Close menu">✕</button>
         </div>
 
-        {/* Drawer links */}
-        <ul className="nt-mobile-links" role="listitem">
+        <ul className="nt-mobile-links">
           {NAV_LINKS.map(({ to, label }) => (
-            <li key={to} >
-              <Link
-                to={to}
-                className="nt-mobile-link"
-                aria-current={isActive(to) ? "page" : undefined}
-                onClick={() => setIsOpen(false)}
-              >
-                {label}
-                <span className="nt-mobile-link-arrow" aria-hidden="true">›</span>
+            <li key={to}>
+              <Link to={to} className="nt-mobile-link" aria-current={isActive(to) ? "page" : undefined} onClick={() => setIsOpen(false)}>
+                {label}<span className="nt-mobile-arrow" aria-hidden="true">›</span>
               </Link>
             </li>
           ))}
@@ -584,34 +263,16 @@ const Navbar = () => {
 
         <hr className="nt-mobile-divider" />
 
-        {/* Drawer CTAs */}
-        <div className="nt-mobile-cta-wrap" style={{ display:"flex", flexDirection:"column", gap:"0.65rem" }}>
-          <Link
-            to="/lab"
-            className="nt-mobile-cta"
-            style={{ background:"transparent", border:"1.5px solid rgba(255,215,0,0.5)", color:"var(--nt-yellow)" }}
-            aria-label="Visit NovaTech R&D Lab"
-            onClick={() => setIsOpen(false)}
-          >
-            <span aria-hidden="true">🔬</span>
-            R&amp;D Lab
-          </Link>
-          <a
-            href="https://wa.me/918336001208?text=Hello, I need some help with my Project !"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="nt-mobile-cta"
-            aria-label="Contact NovaTech on WhatsApp"
-            onClick={() => setIsOpen(false)}
-          >
-            <span aria-hidden="true">💬</span>
-            Get in Touch on WhatsApp
+        <div className="nt-mobile-cta-wrap">
+          {/* <Link to="/lab" className="nt-cta-outline nt-mobile-cta" aria-label="Visit NovaTech R&D Lab" onClick={() => setIsOpen(false)}>
+            <span aria-hidden="true">🔬</span>R&amp;D Lab
+          </Link> */}
+          <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="nt-cta-filled nt-mobile-cta" aria-label="Contact NovaTech on WhatsApp" onClick={() => setIsOpen(false)}>
+            <span aria-hidden="true">💬</span>Get in Touch on WhatsApp
           </a>
         </div>
 
-        <p className="nt-mobile-tagline">
-          Designed, developed &amp; deployed with passion.
-        </p>
+        <p className="nt-mobile-tagline">From Ideas to Innovation.</p>
       </nav>
     </>
   );

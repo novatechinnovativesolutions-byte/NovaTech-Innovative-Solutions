@@ -1,0 +1,246 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"
+     role="img" aria-labelledby="title desc">
+  <title id="title">NovaTech Innovative Solutions — Technology Services</title>
+  <desc id="desc">NovaTech at the center connected to App Development, Web Development, IoT, and AI/ML services.</desc>
+
+  <defs>
+    <linearGradient id="blueGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0757FF"/>
+      <stop offset="52%" stop-color="#477CFF"/>
+      <stop offset="100%" stop-color="#FFC400"/>
+    </linearGradient>
+
+    <linearGradient id="goldBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFC400"/>
+      <stop offset="100%" stop-color="#0757FF"/>
+    </linearGradient>
+
+    <radialGradient id="centerGlow">
+      <stop offset="0%" stop-color="#0B55FF" stop-opacity=".20"/>
+      <stop offset="65%" stop-color="#0B55FF" stop-opacity=".06"/>
+      <stop offset="100%" stop-color="#0B55FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="7" stdDeviation="10"
+                    flood-color="#173A85" flood-opacity=".15"/>
+    </filter>
+
+    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="5"/>
+    </filter>
+
+    <style>
+      .font {
+        font-family: Inter, Arial, Helvetica, sans-serif;
+      }
+
+      .orbit {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: rotate 28s linear infinite;
+      }
+
+      .orbitReverse {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: rotateReverse 36s linear infinite;
+      }
+
+      .service {
+        transition: transform .25s ease;
+        transform-box: fill-box;
+        transform-origin: center;
+      }
+
+      .service:hover {
+        transform: scale(1.035);
+      }
+
+      @keyframes rotate {
+        to { transform: rotate(360deg); }
+      }
+
+      @keyframes rotateReverse {
+        to { transform: rotate(-360deg); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .orbit, .orbitReverse { animation: none; }
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <circle cx="400" cy="400" r="320" fill="url(#centerGlow)"/>
+
+  <!-- Outer dotted technology orbit -->
+  <g class="orbit" fill="none">
+    <circle cx="400" cy="400" r="300"
+            stroke="url(#blueGold)"
+            stroke-width="2.5"
+            stroke-dasharray="5 12"
+            stroke-linecap="round"/>
+
+    <circle cx="400" cy="100" r="7" fill="#0757FF" stroke="none"/>
+    <circle cx="700" cy="400" r="7" fill="#FFC400" stroke="none"/>
+    <circle cx="400" cy="700" r="7" fill="#0757FF" stroke="none"/>
+    <circle cx="100" cy="400" r="7" fill="#FFC400" stroke="none"/>
+
+    <circle cx="560" cy="146" r="5" fill="#FFC400" stroke="none"/>
+    <circle cx="654" cy="560" r="5" fill="#0757FF" stroke="none"/>
+    <circle cx="240" cy="654" r="5" fill="#FFC400" stroke="none"/>
+    <circle cx="146" cy="240" r="5" fill="#0757FF" stroke="none"/>
+  </g>
+
+  <!-- Inner dual-color orbit -->
+  <g class="orbitReverse" fill="none">
+    <circle cx="400" cy="400" r="170"
+            stroke="url(#goldBlue)"
+            stroke-width="2.5"
+            opacity=".72"/>
+  </g>
+
+  <!-- Connector lines -->
+  <g stroke="url(#blueGold)" stroke-width="2" fill="none" opacity=".72">
+    <path d="M400 230V158"/>
+    <path d="M570 400H642"/>
+    <path d="M400 570V642"/>
+    <path d="M230 400H158"/>
+  </g>
+
+  <!-- Connector nodes -->
+  <g fill="#FFFFFF" stroke="url(#blueGold)" stroke-width="3">
+    <circle cx="400" cy="230" r="6"/>
+    <circle cx="570" cy="400" r="6"/>
+    <circle cx="400" cy="570" r="6"/>
+    <circle cx="230" cy="400" r="6"/>
+  </g>
+
+  <!-- ================= CENTER ================= -->
+  <g filter="url(#shadow)" transform="translate(-136.9 -97.4) scale(1.34369 1.24469)">
+    <circle cx="400" cy="400" r="92" fill="#07112F"/>
+    <circle cx="400" cy="400" r="87"
+            fill="none" stroke="url(#blueGold)" stroke-width="2"/>
+  </g>
+
+
+
+  <text x="400" y="400"
+        text-anchor="middle"
+        class="font"
+        font-size="29"
+        font-weight="800"
+        fill="#FFFFFF" transform="translate(-63.4 -40.2) scale(1.15354 1.09821)">
+    Nova<tspan fill="#FFC400">Tech</tspan>
+  </text>
+
+  <text x="400" y="422"
+        text-anchor="middle"
+        class="font"
+        font-size="11"
+        font-weight="600"
+        letter-spacing="1.5"
+        fill="#DDE7FF" transform="translate(-42.3 -298.4) scale(1.09829 1.72188)">
+    INNOVATIVE SOLUTIONS
+  </text>
+
+  <!-- ================= IOT ================= -->
+  <g class="service" filter="url(#shadow)">
+    <circle cx="400" cy="112" r="72" fill="#FFFFFF" stroke="#DCE5F5" stroke-width="2"/>
+    <circle cx="400" cy="112" r="59" fill="#F8FAFF"/>
+
+    <!-- Chip -->
+    <g transform="translate(373 76)"
+       fill="none" stroke="#0757FF" stroke-width="2.8"
+       stroke-linecap="round" stroke-linejoin="round">
+      <rect x="10" y="10" width="34" height="34" rx="5"/>
+      <path d="M17 4v6M25 4v6M33 4v6M41 4v6"/>
+      <path d="M17 44v6M25 44v6M33 44v6M41 44v6"/>
+      <path d="M4 17h6M4 25h6M4 33h6M44 17h6M44 25h6M44 33h6"/>
+      <path d="M21 28c3-5 9-5 12 0"/>
+      <path d="M24 33c1-2 5-2 6 0"/>
+      <circle cx="27" cy="37" r="1.5" fill="#FFC400" stroke="none"/>
+    </g>
+
+    <text x="400" y="160" text-anchor="middle"
+          class="font" font-size="17" font-weight="750" fill="#07112F">IoT</text>
+  </g>
+
+  <!-- ================= WEB ================= -->
+  <g class="service" filter="url(#shadow)">
+    <circle cx="688" cy="400" r="72" fill="#FFFFFF" stroke="#DCE5F5" stroke-width="2"/>
+    <circle cx="688" cy="400" r="59" fill="#F8FAFF"/>
+
+    <!-- Browser -->
+    <g transform="translate(657 368)"
+       fill="none" stroke="#0757FF" stroke-width="2.8"
+       stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="56" height="43" rx="4"/>
+      <path d="M3 16h56"/>
+      <circle cx="11" cy="10.5" r="1.5" fill="#FFC400" stroke="none"/>
+      <circle cx="17" cy="10.5" r="1.5" fill="#0757FF" stroke="none"/>
+      <circle cx="23" cy="10.5" r="1.5" fill="#0757FF" stroke="none"/>
+      <path d="M23 30l-7 6 7 6"/>
+      <path d="M39 30l7 6-7 6"/>
+      <path d="M34 28l-5 16" stroke="#FFC400"/>
+    </g>
+
+    <text x="688" y="448" text-anchor="middle"
+          class="font" font-size="17" font-weight="750" fill="#07112F">Web</text>
+  </g>
+
+  <!-- ================= MOBILE / APP ================= -->
+  <g class="service" filter="url(#shadow)">
+    <circle cx="400" cy="688" r="72" fill="#FFFFFF" stroke="#DCE5F5" stroke-width="2"/>
+    <circle cx="400" cy="688" r="59" fill="#F8FAFF"/>
+
+    <!-- Smartphone -->
+    <g transform="translate(377 653)"
+       fill="none" stroke="#0757FF" stroke-width="2.8"
+       stroke-linecap="round" stroke-linejoin="round">
+      <rect x="8" y="2" width="30" height="52" rx="5"/>
+      <path d="M17 8h12"/>
+      <circle cx="23" cy="47" r="2" fill="#FFC400" stroke="none"/>
+      <path d="M45 25l5 5-5 5-5-5z" stroke="#FFC400"/>
+      <path d="M45 20v-5M45 40v5M35 30h-5M55 30h5"/>
+    </g>
+
+    <text x="400" y="736" text-anchor="middle"
+          class="font" font-size="17" font-weight="750" fill="#07112F">App</text>
+  </g>
+
+  <!-- ================= AI/ML ================= -->
+  <g class="service" filter="url(#shadow)">
+    <circle cx="112" cy="400" r="72" fill="#FFFFFF" stroke="#DCE5F5" stroke-width="2"/>
+    <circle cx="112" cy="400" r="59" fill="#F8FAFF"/>
+
+    <!-- AI brain / neural network -->
+    <g transform="translate(80 368)"
+       fill="none" stroke="#0757FF" stroke-width="2.6"
+       stroke-linecap="round" stroke-linejoin="round">
+      <path d="M31 8c-11 0-18 8-18 18 0 4 1 7 3 10-5 3-7 7-7 13 0 9 7 15 16 15h13V8z"/>
+      <path d="M31 8c11 0 18 8 18 18 0 4-1 7-3 10 5 3 7 7 7 13 0 9-7 15-16 15H31"/>
+      <circle cx="22" cy="27" r="4" fill="#FFC400"/>
+      <circle cx="40" cy="22" r="4"/>
+      <circle cx="29" cy="42" r="4"/>
+      <circle cx="45" cy="51" r="4" fill="#FFC400"/>
+      <path d="M25 29l12-6M25 30l2 9M33 43l9 6"/>
+    </g>
+
+    <text x="112" y="448" text-anchor="middle"
+          class="font" font-size="17" font-weight="750" fill="#07112F">AI / ML</text>
+  </g>
+
+
+
+
+
+
+
+
+  <path d="M300 788H500"
+        stroke="url(#blueGold)"
+        stroke-width="2.5"
+        stroke-linecap="round"/>
+</svg>

@@ -1,1071 +1,245 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 
-/* ─────────────────────────────────────────────────────────────
-   NovaTech Innovative Solutions — About / Projects Page
-   SEO Layers:
-   • JSON-LD WebPage + ItemList schema for projects
-   • h1 → h2 → h3 heading hierarchy
-   • <article> per project card with Product microdata
-   • Review schema for client testimonials
-   • All images have descriptive alt text (keyword-rich)
-   • Sections use ARIA landmarks + aria-labelledby
-   • IntersectionObserver scroll-reveal (no library)
-   ───────────────────────────────────────────────────────────── */
+/* NovaTech IS — Solutions page (route: /solutions). Same tokens/head handling as Home.jsx and AboutServices.jsx.
+   No prices on this page. Customers request a quote through the buttons. Edit content in the data arrays below;
+   they feed both the page and the JSON-LD structured data.
+   Item names are the generic terms people search for. An optional 5th value adds a "NovaTech build" product name. */
 
-/* ── Real project images via Unsplash / open sources ── */
-const FEATURED_PROJECTS = [
-  {
-    id: "fire-alarm",
-    title: "IoT-Based Fire Alarm System",
-    tag: "IoT · Safety",
-    img: "/img/gasSmoke.jpeg",
-    desc: "A smart fire alarm system using MQ-2 smoke sensor, DHT11 temperature sensor, and ESP8266 Wi-Fi module. Sends instant WhatsApp/SMS alerts and triggers a buzzer with LED indicators when smoke or heat is detected.",
-    stack: ["ESP8266", "MQ-2 Sensor", "DHT11", "Blynk IoT", "Arduino"],
-  },
-  {
-    id: "ir-home-automation",
-    title: "IR-Based Home Automation",
-    tag: "Embedded · Smart Home",
-    img: "img/irsomeautomation.jpeg",
-    desc: "Infrared remote-controlled home automation system built on Arduino. Controls lights, fans, and appliances through IR signal decoding — no Wi-Fi needed, fully offline, and highly reliable.",
-    stack: ["Arduino UNO", "IR Receiver", "Relay Module", "TV Remote", "C++"],
-  },
-  {
-    id: "morse-code",
-    title: "Secret Morse Code Communication",
-    tag: "Embedded · Security",
-    img: "img/morsecode.png",
-    desc: "A covert communication device that encodes and decodes messages using Morse code over RF/LED channels. Designed for secure field communications — messages are invisible to casual observers.",
-    stack: ["Arduino", "RF Module", "LCD Display", "Keypad", "LED/Buzzer"],
-  },
-  {
-    id: "rfid-attendance",
-    title: "RFID-Based Attendance System",
-    tag: "IoT · Education",
-    img: "img/rfidattandace.jpeg",
-    desc: "Automated attendance tracking system using MFRC522 RFID cards/tags with real-time data logging to Google Sheets. Features admin dashboard, student records, and instant SMS notifications.",
-    stack: ["NodeMCU", "MFRC522 RFID", "Google Sheets API", "LCD I2C", "Firebase"],
-  },
-  {
-    id: "solar-bag",
-    title: "IoT-Based Solar Charging Bag",
-    tag: "IoT · Green Tech",
-    img: "img/solarbag.jpeg",
-    desc: "An intelligent solar-powered backpack with MPPT charging controller, battery health monitoring via IoT dashboard, and USB-C/USB-A output ports. Tracks solar energy harvested in real-time.",
-    stack: ["ESP32", "Solar Panel", "MPPT Module", "Li-ion Battery", "MQTT"],
-  },
-  {
-    id: "ai-voice-robot",
-    title: "AI Voice Interactive Robot",
-    tag: "AI · Robotics",
-    img: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&q=80",
-    desc: "A fully interactive robot with speech recognition, facial detection, handshake servo mechanism, and mobile app control via Bluetooth. Integrated ChatGPT API for intelligent conversation.",
-    stack: ["Raspberry Pi", "OpenCV", "Google Speech API", "Servo Motors", "Flutter"],
-  },
+const SITE = "https://www.novatechinnovative.com";
+const PAGE = SITE + "/solutions";
+const TITLE = "IoT, Web & App Development Services in India | NovaTech IS";
+const DESC = "NovaTech builds IoT systems, websites, mobile apps and Edge AI products in India: smart home, RFID attendance, e-commerce and custom PCB. Free quote in 24h.";
+const OG_IMAGE = SITE + "/og-image.png";
+const WA = "https://wa.me/918336001208?text=" + encodeURIComponent("Hello, I want a quote for a solution from NovaTech!");
+
+const T = { navy: "#07091c", blue: "#1346e8", blueLight: "#e8effe", yellow: "#f5c518", off: "#f7f8fc", border: "#e4e8f0", text: "#111827", muted: "#5b6472", head: "'Syne', sans-serif", body: "'DM Sans', sans-serif" };
+
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+// [name, description, quoteNote, includes[], optional NovaTech product name]
+const GROUPS = [
+  { id: "iot", tab: "IoT & Embedded", icon: "chip", title: "IoT & Embedded Systems Development", intro: "Connected devices with sensors, firmware, a dashboard and alerts, delivered as a working product.", items: [
+    ["Smart Home Automation System", "Control lights, fans and appliances from a mobile app or remote, with security sensing.", "per setup", ["ESP32 or Arduino controller", "Relay and sensor modules", "Mobile app control"]],
+    ["Smoke & Gas Leak Detection System", "IoT fire and gas alarm with smoke, gas and temperature detection, a buzzer and instant phone alerts.", "per unit", ["MQ-2 and DHT11 sensing", "WhatsApp or SMS alerts", "Cloud dashboard"], "IoT Fire Alarm System"],
+    ["RFID Attendance System", "Card-based attendance logging live to Google Sheets with records and notifications.", "per system", ["MFRC522 reader", "Google Sheets logging", "Admin records"]],
+    ["Smart Irrigation & Soil Monitoring System", "Soil moisture sensing and automated watering with a cloud dashboard for farms and gardens.", "per kit", ["Soil moisture sensors", "Pump automation", "Web or mobile dashboard"]],
+    ["Custom IoT Product & PCB Design", "Your own idea taken from schematic and PCB design to firmware and a tested prototype.", "per prototype", ["PCB design", "Firmware", "Testing and handover"]],
+    ["Edge AI & TinyML Development", "Machine learning that runs on the device: detection, monitoring and alerts without a cloud.", "per prototype", ["Model training", "On-device deployment", "Documentation"]],
+  ] },
+  { id: "web", tab: "Websites & Web Apps", icon: "web", title: "Website Design & Web Application Development", intro: "Fast, SEO-ready websites and full-stack web apps for individuals, institutions and companies.", items: [
+    ["Portfolio Website Design", "A clean, responsive personal website for a student, researcher or professional.", "per site", ["Up to 5 pages", "Mobile-friendly design", "Basic SEO setup"]],
+    ["Business Website Development", "A professional company website that explains your services and brings in enquiries.", "per site", ["Up to 10 pages", "SEO-optimized structure", "Contact and WhatsApp links"]],
+    ["E-Commerce Website Development", "Online store with catalogue, cart, payments and order management for a growing shop.", "per store", ["Product and order admin", "Payment gateway setup", "Responsive storefront"]],
+    ["Management System Development (MERN or Java)", "College, restaurant and internship management software for orders, records, results and billing.", "per system", ["Role-based login", "Admin dashboard", "Database and reports"]],
+  ] },
+  { id: "mobile", tab: "Mobile Apps", icon: "phone", title: "Mobile App Development (Android & iOS)", intro: "Android and iOS apps, including apps that control your IoT devices.", items: [
+    ["Flutter Mobile App Development", "A cross-platform Android and iOS app for your business, startup or project.", "per app", ["Android and iOS from one codebase", "Clean UI design", "API integration"]],
+    ["IoT Mobile App Development", "A companion app to monitor and control your hardware over Wi-Fi, Bluetooth or MQTT.", "per app", ["Live sensor data", "Device control", "Alerts"]],
+  ] },
+  { id: "innovative", tab: "Innovative Products", icon: "spark", title: "Innovative IoT & Robotics Products", intro: "Products we designed ourselves. Buy them as they are, or have them customised.", items: [
+    ["Solar-Powered Smart Backpack", "A solar charging bag with MPPT charging, USB output and a battery-health dashboard.", "per unit", ["Solar panel and MPPT", "USB-C and USB-A output", "Energy dashboard"], "IoT Solar Charging Bag"],
+    ["AI Voice & Face Recognition Robot", "Speech recognition, face detection and mobile control in one interactive robot.", "per robot", ["Speech and vision", "Servo handshake", "Bluetooth app"], "AI Voice Interactive Robot"],
+    ["Wearable Health Monitoring System", "Monitoring of heart rate, SpO2 and temperature with a live dashboard and alerts.", "per prototype", ["Multi-sensor vitals", "Live dashboard", "Alert logic"]],
+    ["Secure RF Communication Device", "Message encoding and decoding over RF and LED channels for private communication.", "per pair", ["RF module", "LCD and keypad", "Encode and decode"]],
+  ] },
 ];
 
-const ALL_PRODUCTS = [
+const POPULAR = ["Smart Home Automation System", "RFID Attendance System", "Smoke & Gas Leak Detection System", "Smart Irrigation & Soil Monitoring System", "Custom IoT Product & PCB Design", "Business Website Development", "E-Commerce Website Development", "Flutter Mobile App Development"];
 
-{ title: "University Management System", img: "https://img.icons8.com/ios/100/graduation-cap.png", desc: "Java-based system for students, results, attendance, and course data." },  
-{ title: "Restaurant Management (MERN)", img: "https://img.icons8.com/ios/100/restaurant.png", desc: "Full-stack app for orders, menu, reservations, and billing." },
-{ title: "E-Commerce & Mobile Apps", img: "https://img.icons8.com/ios/100/online-store.png", desc: "Custom e-commerce and mobile apps for startups and businesses." },
-{ title: "Smart Home Automation", img: "https://img.icons8.com/ios/100/smart-home-connection.png", desc: "IoT smart home with mobile app control for appliances and security." },
-{ title: "Smart Agriculture Kit", img: "https://img.icons8.com/ios/100/plant-under-sun.png", desc: "IoT farming with soil sensors and automated irrigation." },
-{ title: "Internship Training Portal", img: "https://img.icons8.com/ios/100/classroom.png", desc: "Web app for internship management, mentor assignment, and tracking." },
-{ title: "Research Thesis & Papers", img: "https://img.icons8.com/ios/100/books.png", desc: "Research support, thesis writing, simulations, and publication help." }
+const STEPS = [["Share your idea", "Tell us what to build. Consultation is free."], ["Get a clear quote", "Plan, timeline and final quote within 24 hours."], ["Build with milestones", "Regular updates and demos."], ["Deliver and support", "Testing, handover and help after delivery."]];
 
+const FAQ = [
+  ["How much does an IoT project cost?", "The cost depends on the sensors, hardware, features and timeline. Simple devices such as alarms and automation are quick to build, while custom devices with PCB design and firmware take more work. Tell us what you need and we send a fixed written quote within 24 hours."],
+  ["Can I get a custom version of a listed solution?", "Yes. Every solution here can be customised for your sensors, features, branding or budget."],
+  ["Which platforms do you use for IoT development?", "We build with ESP32, ESP8266, Arduino and Raspberry Pi, and connect devices to dashboards and mobile apps over Wi-Fi, Bluetooth or MQTT."],
+  ["Can you build a website and a mobile app together?", "Yes. We can build a website, a mobile app and the IoT devices behind them as one project, so everything works together."],
+  ["How long does a project take?", "Small IoT builds and websites often take one to three weeks. Larger apps and custom hardware take longer, and you get a timeline with the quote."],
+  ["Do you support student and college projects?", "Yes. We build and guide IoT, AI and web projects for final-year and semester students. See our student project mentoring and training pages for guided projects, reports and workshops."],
 ];
 
+const PATHS = { chip: "M7 7h10v10H7zM9 7V4M12 7V4M15 7V4M9 20v-3M12 20v-3M15 20v-3M7 9H4M7 12H4M7 15H4M20 9h-3M20 12h-3M20 15h-3", web: "M3 5h18v14H3zM3 9h18M6 7h.01M9 7h.01", phone: "M8 2h8a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM11 18h2", spark: "M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z" };
+const Ico = ({ n }) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={PATHS[n]} /></svg>);
 
-
-/* ── Training images ── */
-const TRAINING_SESSIONS = [
-  {
-    img: "/img/surtech.jpg",
-    alt: "IoT training workshop at engineering college — students working with NodeMCU and sensors",
-    label: "IoT & ES BCT - Beyond Curriculum Training",
-    uni: "Engineering College, West Bengal",
-  },
-  {
-    img: "/img/jisce.png",
-    alt: "Embedded systems training session — hands-on Arduino and microcontroller lab",
-    label: "VLSI BCT - Beyond Curriculum Training",
-    uni: "Engineering College, West Bengal",
-  },
-
-];
-
-/* ── Training images ── */
-const CLIENT_IMG = [
-  {
-    img: "img/client1.jpeg",
-    label: "Completed Personal Project for 7th Semester",
-    uni: "Engineering College, West Bengal",
-  },
-  {
-    img: "img/client2.jpeg",
-    label: "Complete Final Year Project + Research Paper",
-    uni: "Engineering College, West Bengal",
-  },
-
-];
-
-
-/* ── Client testimonials ── */
-const TESTIMONIALS = [
-  {
-    id: "t1",
-    name: "Rohan M.",
-    role: "Final Year B.Tech Student, CSE",
-    rating: 5,
-    review: "NovaTech helped me build a complete IoT-based attendance system for my final year project. The team was incredibly supportive — from hardware selection to report writing and presentation. Got an A+ grade and a publication too!",
-    avatar: "https://images.unsplash.com/photo-1557862921-37829c790f19?w=200&q=80",
-    project: "RFID Attendance + Research Paper",
-  },
-  {
-    id: "t2",
-    name: "Priya S.",
-    role: "M.Tech Research Scholar",
-    rating: 5,
-    review: "I needed a working prototype for my thesis with real sensor data and ML integration. NovaTech delivered a fully functional TinyML health monitoring device within the deadline. Exceptional quality and communication throughout.",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80",
-    project: "TinyML Medical Alert System",
-  },
-  {
-    id: "t3",
-    name: "Arjun K.",
-    role: "Startup Founder, Kolkata",
-    rating: 5,
-    review: "We hired NovaTech for our smart agriculture IoT platform. They built the entire system — sensors, cloud dashboard, and mobile app — in just 3 weeks. Highly professional and deeply technical team.",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80",
-    project: "Smart Agriculture IoT Platform",
-  },
-  {
-    id: "t4",
-    name: "Sneha D.",
-    role: "Diploma Student, Electronics",
-    rating: 5,
-    review: "The workshop on embedded systems was amazing! Hands-on sessions with Arduino, ESP32, and real projects. The trainers explained everything so clearly. I built my first IoT project after just 2 days of training.",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80",
-    project: "Embedded Systems Workshop",
-  },
-  
-];
-
-
-const schemaData = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebPage",
-      name: "About NovaTech Innovative Solutions — IoT, AI & Embedded Projects",
-      description: "Explore NovaTech's portfolio of IoT, AI, robotics, and embedded systems projects. See client reviews and training workshops.",
-      url: "https://novatech-is.in/about",
-    },
-    {
-      "@type": "ItemList",
-      name: "NovaTech Project Portfolio",
-      itemListElement: FEATURED_PROJECTS.map((p, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        name: p.title,
-        description: p.desc,
-      })),
-    },
-    {
-      "@type": "EducationalOrganization",
-      name: "NovaTech Innovative Solutions",
-      url: "https://novatech-is.in",
-      hasOfferCatalog: {
-        "@type": "OfferCatalog",
-        name: "Training & Workshops",
-        itemListElement: [
-          { "@type": "Offer", itemOffered: { "@type": "Course", name: "IoT Training Workshop" } },
-          { "@type": "Offer", itemOffered: { "@type": "Course", name: "Embedded Systems Workshop" } },
-        ],
-      },
-    },
-  ],
-};
-
-/* ── Stagger util ── */
-const useReveal = () => {
-  const refs = useRef([]);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("nta-show")),
-      { threshold: 0.08 }
-    );
-    refs.current.forEach((el) => el && obs.observe(el));
-    return () => obs.disconnect();
-  }, []);
-  return refs;
-};
-
-/* ── Stars ── */
-const Stars = ({ n }) => (
-  <div aria-label={`${n} out of 5 stars`} style={{ display: "flex", gap: 2 }}>
-    {Array.from({ length: 5 }).map((_, i) => (
-      <span key={i} style={{ color: i < n ? "#FFD700" : "rgba(255,255,255,0.2)", fontSize: "0.9rem" }}>★</span>
-    ))}
-  </div>
+/* Hero graphic: desktop only.
+   On screens <= 860px the <source> swaps in a 1x1 transparent GIF so the SVG is never downloaded,
+   and CSS (.hero-art) hides the element as well. */
+const BLANK = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+const Hero4 = () => (
+  <picture className="hero-art">
+    <source media="(max-width: 860px)" srcSet={BLANK} />
+    <img src="/novatech-services2.svg" alt="NovaTech Innovative Solutions: IoT, web and mobile app solutions, training and R&D" width="600" height="500" fetchPriority="high" decoding="async" />
+  </picture>
 );
 
-const About = () => {
-  const [modal, setModal] = useState(null);
-  const projRefs = useReveal();
-  const cardRefs = useReveal();
-  const trainRefs = useReveal();
-  const testRefs = useReveal();
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
-      />
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
-        :root {
-          --nt-navy:   #0B1F4A;
-          --nt-navy2:  #071530;
-          --nt-blue:   #1E3A8A;
-          --nt-sky:    #2563EB;
-          --nt-yellow: #FFD700;
-          --nt-gold:   #F59E0B;
-          --nt-white:  #FFFFFF;
-          --nt-muted:  rgba(255,255,255,0.55);
-          --nt-border: rgba(255,255,255,0.09);
-          --nt-glass:  rgba(255,255,255,0.04);
-          --font-d: 'Syne', sans-serif;
-          --font-b: 'DM Sans', sans-serif;
-        }
-
-        /* ── Base ── */
-        .nta-page {
-          background: linear-gradient(180deg, #071530 0%, #0B1F4A 40%, #0e2454 100%);
-          color: var(--nt-white);
-          font-family: var(--font-b);
-          min-height: 100vh;
-        }
-
-        /* ── Section wrapper ── */
-        .nta-sec {
-          padding: 80px 20px;
-          position: relative;
-          overflow: hidden;
-        }
-        .nta-sec + .nta-sec { border-top: 1px solid var(--nt-border); }
-        .nta-wrap {
-          max-width: 1280px;
-          margin: 0 auto;
-          position: relative;
-          z-index: 1;
-        }
-
-        /* ── Section heading pattern ── */
-        .nta-eyebrow {
-          display: inline-flex;
-          align-items: center;
-          gap: .5rem;
-          padding: .3rem 1rem;
-          background: rgba(255,215,0,0.1);
-          border: 1px solid rgba(255,215,0,0.25);
-          border-radius: 999px;
-          font-size: .72rem;
-          font-weight: 700;
-          color: var(--nt-yellow);
-          letter-spacing: .12em;
-          text-transform: uppercase;
-          margin-bottom: 1rem;
-        }
-        .nta-eyebrow-dot { width:6px;height:6px;border-radius:50%;background:var(--nt-yellow); }
-
-        .nta-h1, .nta-h2 {
-          font-family: var(--font-d);
-          font-weight: 800;
-          line-height: 1.15;
-          margin-bottom: .75rem;
-        }
-        .nta-h1 { font-size: clamp(2rem,4.5vw,3.2rem); }
-        .nta-h2 { font-size: clamp(1.6rem,3vw,2.4rem); }
-        .nta-accent {
-          background: linear-gradient(90deg, var(--nt-yellow), var(--nt-gold));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        .nta-lead {
-          font-size: 1rem;
-          color: var(--nt-muted);
-          line-height: 1.8;
-          max-width: 700px;
-        }
-        .nta-center { text-align: center; }
-        .nta-center .nta-lead { margin: 0 auto; }
-
-        /* ── Hero intro ── */
-        .nta-hero {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4rem;
-          align-items: center;
-          padding: 80px 20px 60px;
-        }
-        .nta-hero-stats {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 1rem;
-          margin-top: 2rem;
-        }
-        .nta-stat-box {
-          background: var(--nt-glass);
-          border: 1px solid var(--nt-border);
-          border-radius: 14px;
-          padding: 1.25rem;
-          text-align: center;
-        }
-        .nta-stat-n {
-          font-family: var(--font-d);
-          font-size: 2rem;
-          font-weight: 800;
-          color: var(--nt-yellow);
-        }
-        .nta-stat-l { font-size: .8rem; color: var(--nt-muted); }
-        .nta-hero-img-wrap {
-          position: relative;
-          border-radius: 20px;
-          overflow: hidden;
-          aspect-ratio: 4/3;
-          border: 1px solid var(--nt-border);
-          box-shadow: 0 32px 64px rgba(0,0,0,0.5);
-        }
-        .nta-hero-img-wrap img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        .nta-hero-badge {
-          position: absolute;
-          bottom: 16px;
-          left: 16px;
-          background: rgba(11,31,74,0.9);
-          border: 1px solid var(--nt-border);
-          backdrop-filter: blur(10px);
-          border-radius: 10px;
-          padding: .6rem 1rem;
-          font-size: .78rem;
-          color: var(--nt-white);
-          display: flex;
-          align-items: center;
-          gap: .5rem;
-        }
-        .nta-hero-badge span { color: var(--nt-yellow); font-weight: 700; }
-
-        /* ── Featured Projects ── */
-        .nta-proj-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 1.75rem;
-        }
-        .nta-proj-card {
-          background: var(--nt-glass);
-          border: 1px solid var(--nt-border);
-          border-radius: 18px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
-          opacity: 0;
-          transform: translateY(30px);
-          cursor: pointer;
-        }
-        .nta-proj-card.nta-show {
-          animation: nta-up .55s ease forwards;
-        }
-        @keyframes nta-up { to { opacity:1; transform:translateY(0); } }
-        .nta-proj-card:hover {
-          transform: translateY(-6px);
-          box-shadow: 0 24px 56px rgba(0,0,0,0.4);
-          border-color: rgba(255,215,0,0.3);
-        }
-        .nta-proj-img {
-          width: 100%;
-          aspect-ratio: 16/9;
-          object-fit: cover;
-          display: block;
-          transition: transform .4s ease;
-        }
-        .nta-proj-card:hover .nta-proj-img { transform: scale(1.04); }
-        .nta-proj-body { padding: 1.4rem; flex: 1; display: flex; flex-direction: column; }
-        .nta-proj-tag {
-          font-size: .68rem;
-          font-weight: 700;
-          letter-spacing: .1em;
-          text-transform: uppercase;
-          color: var(--nt-yellow);
-          margin-bottom: .6rem;
-        }
-        .nta-proj-title {
-          font-family: var(--font-d);
-          font-size: 1.05rem;
-          font-weight: 700;
-          color: var(--nt-white);
-          margin-bottom: .6rem;
-          line-height: 1.3;
-        }
-        .nta-proj-desc {
-          font-size: .84rem;
-          color: var(--nt-muted);
-          line-height: 1.65;
-          flex: 1;
-          margin-bottom: 1rem;
-        }
-        .nta-stack {
-          display: flex;
-          flex-wrap: wrap;
-          gap: .4rem;
-        }
-        .nta-chip {
-          padding: .22rem .65rem;
-          background: rgba(37,99,235,0.2);
-          border: 1px solid rgba(37,99,235,0.35);
-          border-radius: 999px;
-          font-size: .68rem;
-          font-weight: 600;
-          color: rgba(255,255,255,0.7);
-        }
-
-        /* ── All Products mini grid ── */
-        .nta-mini-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          gap: 1.25rem;
-        }
-        .nta-mini-card {
-          background: var(--nt-glass);
-          border: 1px solid var(--nt-border);
-          border-radius: 14px;
-          padding: 1.25rem 1rem;
-          text-align: center;
-          transition: transform .25s ease, border-color .25s ease;
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        .nta-mini-card.nta-show { animation: nta-up .45s ease forwards; }
-        .nta-mini-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(255,215,0,0.3);
-        }
-        .nta-mini-card img {
-          width: 52px; height: 52px;
-          margin-bottom: .75rem;
-          filter: invert(1) brightness(0.85) sepia(1) hue-rotate(180deg) saturate(3);
-          opacity: .85;
-        }
-        .nta-mini-title {
-          font-family: var(--font-d);
-          font-size: .88rem;
-          font-weight: 700;
-          color: var(--nt-white);
-          margin-bottom: .4rem;
-        }
-        .nta-mini-desc { font-size: .75rem; color: var(--nt-muted); line-height: 1.5; }
-
-        /* ── Training ── */
-        .nta-train-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1.75rem;
-        }
-        .nta-train-card {
-          border-radius: 18px;
-          overflow: hidden;
-          position: relative;
-          aspect-ratio: 16/9;
-          border: 1px solid var(--nt-border);
-          transform: translateY(24px);
-          transition: transform .3s ease, box-shadow .3s ease;
-          transform: translateZ(24px);
-
-        }
-        .nta-train-card.nta-show { animation: nta-up .5s ease forwards; }
-        .nta-train-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 20px 48px rgba(0,0,0,0.45);
-        }
-        .nta-train-card img {
-          width: 100%; height: 100%;
-          object-fit: cover;
-          display: block;
-          transition: transform .4s ease;
-        }
-        .nta-train-card:hover img { transform: scale(1.04); }
-        .nta-train-overlay {
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          background: linear-gradient(transparent, rgba(7,21,48,0.92));
-          padding: 2.5rem 1.5rem 1.25rem;
-        }
-        .nta-train-label {
-          font-family: var(--font-d);
-          font-size: .95rem;
-          font-weight: 700;
-          color: var(--nt-white);
-        }
-        .nta-train-uni { font-size: .78rem; color: var(--nt-yellow); margin-top: .2rem; }
-
-        /* ── Testimonials ── */
-        .nta-test-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1.75rem;
-        }
-        .nta-test-card {
-          background: var(--nt-glass);
-          border: 1px solid var(--nt-border);
-          border-radius: 18px;
-          padding: 1.75rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          opacity: 0;
-          transform: translateY(24px);
-          transition: transform .3s ease, border-color .3s ease;
-        }
-        .nta-test-card.nta-show { animation: nta-up .5s ease forwards; }
-        .nta-test-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(255,215,0,0.22);
-        }
-        .nta-test-quote {
-          font-size: .9rem;
-          color: rgba(255,255,255,0.75);
-          line-height: 1.75;
-          font-style: italic;
-          flex: 1;
-        }
-        .nta-test-quote::before { content: '"'; color: var(--nt-yellow); font-size: 1.4rem; line-height: 0; vertical-align: -0.3em; margin-right: 4px; }
-        .nta-test-quote::after  { content: '"'; color: var(--nt-yellow); font-size: 1.4rem; line-height: 0; vertical-align: -0.3em; margin-left: 4px; }
-        .nta-test-project {
-          font-size: .72rem;
-          font-weight: 700;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-          color: var(--nt-sky);
-          padding: .25rem .75rem;
-          background: rgba(37,99,235,0.15);
-          border: 1px solid rgba(37,99,235,0.3);
-          border-radius: 999px;
-          width: fit-content;
-        }
-        .nta-test-person {
-          display: flex;
-          align-items: center;
-          gap: .85rem;
-          padding-top: .75rem;
-          border-top: 1px solid var(--nt-border);
-        }
-        /* Avatar with privacy blur — real person image blurred */
-        .nta-avatar-wrap {
-          position: relative;
-          width: 46px; height: 46px;
-          border-radius: 50%;
-          overflow: hidden;
-          flex-shrink: 0;
-          border: 2px solid rgba(255,215,0,0.35);
-        }
-        .nta-avatar-wrap img {
-          width: 100%; height: 100%;
-          object-fit: cover;
-          filter: blur(4px) brightness(0.85);
-          transform: scale(1.1);
-        }
-        .nta-avatar-lock {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: .7rem;
-          color: rgba(255,255,255,0.5);
-        }
-        .nta-test-name {
-          font-family: var(--font-d);
-          font-size: .9rem;
-          font-weight: 700;
-          color: var(--nt-white);
-        }
-        .nta-test-role { font-size: .75rem; color: var(--nt-muted); }
-
-        /* ── CTA strip ── */
-        .nta-cta-strip {
-          background: linear-gradient(135deg, rgba(37,99,235,0.2), rgba(255,215,0,0.08));
-          border: 1px solid rgba(37,99,235,0.3);
-          border-radius: 20px;
-          padding: 3rem 2rem;
-          text-align: center;
-        }
-        .nta-cta-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: .6rem;
-          padding: .8rem 2rem;
-          background: var(--nt-yellow);
-          color: var(--nt-navy);
-          font-family: var(--font-d);
-          font-size: .95rem;
-          font-weight: 800;
-          border-radius: 10px;
-          text-decoration: none;
-          margin-top: 1.5rem;
-          transition: transform .2s ease, box-shadow .2s ease;
-        }
-        .nta-cta-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 28px rgba(255,215,0,0.35);
-        }
-
-        /* ── Modal ── */
-        .nta-modal-bg {
-          position: fixed; inset: 0;
-          background: rgba(0,0,0,0.85);
-          backdrop-filter: blur(6px);
-          z-index: 2000;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1rem;
-        }
-        .nta-modal-box {
-          background: #0B1F4A;
-          border: 1px solid var(--nt-border);
-          border-radius: 18px;
-          max-width: 700px;
-          width: 100%;
-          overflow: hidden;
-          position: relative;
-        }
-        .nta-modal-box img {
-          width: 100%;
-          max-height: 360px;
-          object-fit: cover;
-          display: block;
-        }
-        .nta-modal-body { padding: 1.5rem; }
-        .nta-modal-title {
-          font-family: var(--font-d);
-          font-size: 1.2rem;
-          font-weight: 800;
-          color: var(--nt-white);
-          margin-bottom: .5rem;
-        }
-        .nta-modal-desc { font-size: .88rem; color: var(--nt-muted); line-height: 1.7; margin-bottom: 1rem; }
-        .nta-modal-close {
-          position: absolute;
-          top: 12px; right: 12px;
-          width: 36px; height: 36px;
-          border-radius: 50%;
-          background: rgba(11,31,74,0.9);
-          border: 1px solid var(--nt-border);
-          color: var(--nt-white);
-          font-size: 1rem;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 1050px) {
-          .nta-proj-grid { grid-template-columns: repeat(2, 1fr); }
-          .nta-hero { grid-template-columns: 1fr; }
-          .nta-hero-img-wrap { max-width: 500px; margin: 0 auto; }
-        }
-        @media (max-width: 700px) {
-          .nta-proj-grid, .nta-train-grid, .nta-test-grid { grid-template-columns: 1fr; }
-          .nta-hero-stats { grid-template-columns: repeat(2, 1fr); }
-          .nta-sec { padding: 56px 16px; }
-        }
-      `}</style>
-
-      <div className="nta-page">
-        {/* ═══════════════════════════════════════════
-            HERO INTRO
-        ═══════════════════════════════════════════ */}
-        <section
-          className="nta-sec"
-          style={{ padding: 0 }}
-          aria-labelledby="about-heading"
-          itemScope
-          itemType="https://schema.org/AboutPage"
-        >
-          <div className="nta-wrap nta-hero">
-            <div>
-              <div className="nta-eyebrow">
-                <span className="nta-eyebrow-dot" aria-hidden="true" />
-                About NovaTech
-              </div>
-              <h1 className="nta-h1" id="about-heading" itemProp="name">
-                Building the Future with <span className="nta-accent">IoT, AI & Embedded Tech</span>
-              </h1>
-              <p className="nta-lead" itemProp="description">
-                At <strong>NovaTech Innovative Solutions</strong>, we design and build powerful,
-                affordable software and hardware solutions — from IoT systems and AI/ML models
-                to full-stack web apps and academic project guidance. Based in West Bengal, India,
-                we've delivered 150+ projects for students, startups, and enterprises.
-              </p>
-              <div className="nta-hero-stats" aria-label="NovaTech achievements">
-                {[
-                  { n: "20+", l: "Projects Delivered" },
-                  { n: "200+", l: "Students Trained" },
-                  { n: "5+", l: "Universities Reached" },
-                  { n: "5★",  l: "Client Rating" },
-                ].map(({ n, l }) => (
-                  <div className="nta-stat-box" key={l}>
-                    <div className="nta-stat-n">{n}</div>
-                    <div className="nta-stat-l">{l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="nta-hero-img-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80"
-                alt="NovaTech team working on embedded systems and IoT hardware projects"
-                loading="eager"
-              />
-              <div className="nta-hero-badge">
-                🏆 <span>Top-Rated</span> by 200+ Students & Startups
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            FEATURED PROJECTS
-        ═══════════════════════════════════════════ */}
-        <section
-          className="nta-sec"
-          aria-labelledby="projects-heading"
-          id="projects"
-          itemScope
-          itemType="https://schema.org/ItemList"
-        >
-          <div className="nta-wrap">
-            <div className="nta-center" style={{ marginBottom: "3rem" }}>
-              <div className="nta-eyebrow">
-                <span className="nta-eyebrow-dot" aria-hidden="true" />
-                Featured Work
-              </div>
-              <h2 className="nta-h2" id="projects-heading" itemProp="name">
-                Real Projects, <span className="nta-accent">Real Impact</span>
-              </h2>
-              <p className="nta-lead">
-                A selection of our most innovative IoT, embedded systems, and AI projects —
-                each deployed and tested in real-world environments.
-              </p>
-            </div>
-
-            <div className="nta-proj-grid" role="list">
-              {FEATURED_PROJECTS.map((p, i) => (
-                <article
-                  key={p.id}
-                  className="nta-proj-card"
-                  role="listitem"
-                  ref={(el) => (projRefs.current[i] = el)}
-                  style={{ animationDelay: `${(i % 3) * 100}ms` }}
-                  onClick={() => setModal(p)}
-                  aria-label={`View details: ${p.title}`}
-                  itemScope
-                  itemType="https://schema.org/CreativeWork"
-                >
-                  <img
-                    className="nta-proj-img"
-                    src={p.img}
-                    alt={`NovaTech project: ${p.title} — ${p.tag}`}
-                    loading="lazy"
-                    itemProp="image"
-                  />
-                  <div className="nta-proj-body">
-                    <div className="nta-proj-tag">{p.tag}</div>
-                    <h3 className="nta-proj-title" itemProp="name">{p.title}</h3>
-                    <p className="nta-proj-desc" itemProp="description">{p.desc}</p>
-                    <div className="nta-stack" aria-label="Technologies used">
-                      {p.stack.map((s) => <span key={s} className="nta-chip">{s}</span>)}
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            ALL SOLUTIONS MINI GRID
-        ═══════════════════════════════════════════ */}
-        <section className="nta-sec" aria-labelledby="solutions-heading">
-          <div className="nta-wrap">
-            <div className="nta-center" style={{ marginBottom: "3rem" }}>
-              <div className="nta-eyebrow">
-                <span className="nta-eyebrow-dot" aria-hidden="true" />
-                What We Build
-              </div>
-              <h2 className="nta-h2" id="solutions-heading">
-                More Solutions <span className="nta-accent">We Deliver</span>
-              </h2>
-              <p className="nta-lead">
-                From wearable IoT to enterprise software — our diverse portfolio covers
-                every domain of modern technology for students and businesses alike.
-              </p>
-            </div>
-            <div className="nta-mini-grid" role="list">
-              {ALL_PRODUCTS.map((p, i) => (
-                <div
-                  key={p.title}
-                  className="nta-mini-card"
-                  role="listitem"
-                  ref={(el) => (cardRefs.current[i] = el)}
-                  style={{ animationDelay: `${(i % 4) * 75}ms` }}
-                >
-                  <img src={p.img} alt={p.title} loading="lazy" />
-                  <div className="nta-mini-title">{p.title}</div>
-                  <p className="nta-mini-desc">{p.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            TRAINING SESSIONS
-        ═══════════════════════════════════════════ */}
-        <section
-          className="nta-sec"
-          aria-labelledby="training-heading"
-          id="training"
-        >
-          <div className="nta-wrap">
-            <div className="nta-center" style={{ marginBottom: "3rem" }}>
-              <div className="nta-eyebrow">
-                <span className="nta-eyebrow-dot" aria-hidden="true" />
-                Training & Workshops
-              </div>
-              <h2 className="nta-h2" id="training-heading">
-                Hands-On Learning <span className="nta-accent">Across Universities</span>
-              </h2>
-              <p className="nta-lead">
-                We've conducted IoT, Embedded Systems, and AI/ML workshops at multiplr engineering
-                colleges across West Bengal and beyond. Our practical,
-                project-based training gives students real industry experience.
-              </p>
-            </div>
-
-            <div className="nta-train-grid">
-              {TRAINING_SESSIONS.map((t, i) => (
-                <figure
-                  key={t.label}
-                  className="nta-train-card"
-                  ref={(el) => (trainRefs.current[i] = el)}
-                  style={{ animationDelay: `${i * 100}ms`, margin: 0 }}
-                  itemScope
-                  itemType="https://schema.org/Event"
-                >
-                  <img
-                    src={t.img}
-                    alt={t.alt}
-                    loading="lazy"
-                    itemProp="image"
-                  />
-                  <div className="nta-train-overlay">
-                    <div className="nta-train-label" itemProp="name">{t.label}</div>
-                    <div className="nta-train-uni" itemProp="location">{t.uni}</div>
-                  </div>
-                </figure>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            CLIENT TESTIMONIALS
-        ═══════════════════════════════════════════ */}
-        <section
-          className="nta-sec"
-          aria-labelledby="reviews-heading"
-          id="reviews"
-          itemScope
-          itemType="https://schema.org/ItemList"
-        >
-          <div className="nta-wrap">
-            <div className="nta-center" style={{ marginBottom: "3rem" }}>
-              <div className="nta-eyebrow">
-                <span className="nta-eyebrow-dot" aria-hidden="true" />
-                Client Feedback
-              </div>
-              <h2 className="nta-h2" id="reviews-heading">
-                What Our <span className="nta-accent">Clients Say</span>
-              </h2>
-              <p className="nta-lead">
-                Honest reviews from students, researchers, and startups who've worked with
-                NovaTech. Client identities are partially anonymised for privacy.
-              </p>
-            </div>
-
-            <div
-              className="nta-test-grid"
-              role="list"
-              aria-label="Client testimonials"
-            >
-              {TESTIMONIALS.map((t, i) => (
-                <article
-                  key={t.id}
-                  className="nta-test-card"
-                  role="listitem"
-                  ref={(el) => (testRefs.current[i] = el)}
-                  style={{ animationDelay: `${(i % 2) * 120}ms` }}
-                  itemScope
-                  itemType="https://schema.org/Review"
-                >
-                  <div
-                    itemScope
-                    itemType="https://schema.org/Rating"
-                    itemProp="reviewRating"
-                  >
-                    <meta itemProp="ratingValue" content={t.rating} />
-                    <meta itemProp="bestRating" content="5" />
-                    <Stars n={t.rating} />
-                  </div>
-
-                  <span className="nta-test-project">{t.project}</span>
-
-                  <blockquote
-                    className="nta-test-quote"
-                    itemProp="reviewBody"
-                    cite="https://novatech-is.in/about"
-                  >
-                    {t.review}
-                  </blockquote>
-
-                  <div
-                    className="nta-test-person"
-                    itemScope
-                    itemType="https://schema.org/Person"
-                    itemProp="author"
-                  >
-                    {/* Blurred avatar for privacy */}
-                    <div
-                      className="nta-avatar-wrap"
-                      title="Identity hidden for privacy"
-                      aria-label="Client photo (blurred for privacy)"
-                    >
-                      <img src={t.avatar} alt="Client (identity protected)" loading="lazy" />
-                      <span className="nta-avatar-lock" aria-hidden="true">🔒</span>
-                    </div>
-                    <div>
-                      <div className="nta-test-name" itemProp="name">{t.name}</div>
-                      <div className="nta-test-role" itemProp="jobTitle">{t.role}</div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <div>
-              <br />
-            <div className="nta-train-grid">
-              {CLIENT_IMG.map((t, i) => (
-                <figure
-                  key={t.label}
-                  className="nta-train-card"
-                  ref={(el) => (trainRefs.current[i] = el)}
-                  style={{ animationDelay: `${i * 100}ms`, margin: 0 }}
-                  itemScope
-                  itemType="https://schema.org/Event"
-                >
-                  <img
-                    src={t.img}
-                    alt={t.alt}
-                    loading="lazy"
-                    itemProp="image"
-                  />
-                  <div className="nta-train-overlay">
-                    <div className="nta-train-label" itemProp="name">{t.label}</div>
-                    <div className="nta-train-uni" itemProp="location">{t.uni}</div>
-                  </div>
-                </figure>
-              ))}
-            </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════════════════════════════════
-            BOTTOM CTA
-        ═══════════════════════════════════════════ */}
-        <section className="nta-sec" aria-label="Contact NovaTech">
-          <div className="nta-wrap">
-            <div className="nta-cta-strip">
-              <div className="nta-eyebrow" style={{ margin: "0 auto 1rem" }}>
-                <span className="nta-eyebrow-dot" />
-                Start Your Project
-              </div>
-              <h2 className="nta-h2">
-                Got an idea? Let's <span className="nta-accent">Build it Together</span>
-              </h2>
-              <p className="nta-lead" style={{ margin: "0.75rem auto 0", maxWidth: 520 }}>
-                Whether it's a final year project, startup MVP, or enterprise IoT system —
-                NovaTech has the skills to deliver. Reach out for a free consultation.
-              </p>
-              <a
-                href="https://wa.me/918336001208?text=Hello, I want to discuss a project with NovaTech!"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nta-cta-btn"
-                aria-label="Contact NovaTech on WhatsApp to start your project"
-              >
-                💬 Chat on WhatsApp
-              </a>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ═══════════════════════════════════════════
-          PROJECT DETAIL MODAL
-      ═══════════════════════════════════════════ */}
-      {modal && (
-        <div
-          className="nta-modal-bg"
-          onClick={() => setModal(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Project details: ${modal.title}`}
-        >
-          <div className="nta-modal-box" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="nta-modal-close"
-              onClick={() => setModal(null)}
-              aria-label="Close modal"
-            >✕</button>
-            <img
-              src={modal.img}
-              alt={`NovaTech project showcase: ${modal.title}`}
-            />
-            <div className="nta-modal-body">
-              <div className="nta-proj-tag">{modal.tag}</div>
-              <div className="nta-modal-title">{modal.title}</div>
-              <p className="nta-modal-desc">{modal.desc}</p>
-              <div className="nta-stack">
-                {modal.stack.map((s) => <span key={s} className="nta-chip">{s}</span>)}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+const Seo = () => {
+  const offers = GROUPS.map((g) => ({ "@type": "Service", "@id": PAGE + "#" + g.id, name: g.title, description: g.intro, serviceType: g.title, provider: { "@id": SITE + "/#org" }, areaServed: { "@type": "Country", name: "India" },
+    hasOfferCatalog: { "@type": "OfferCatalog", name: g.title, itemListElement: g.items.map(([n, d]) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: n, description: d, provider: { "@id": SITE + "/#org" } } })) } }));
+  const graph = { "@context": "https://schema.org", "@graph": [
+    { "@type": "Organization", "@id": SITE + "/#org", name: "NovaTech Innovative Solutions", alternateName: "NovaTech IS", url: SITE, address: { "@type": "PostalAddress", addressLocality: "Kolkata", addressRegion: "West Bengal", addressCountry: "IN" }, areaServed: { "@type": "Country", name: "India" } },
+    { "@type": "WebSite", "@id": SITE + "/#website", url: SITE, name: "NovaTech Innovative Solutions", publisher: { "@id": SITE + "/#org" }, inLanguage: "en-IN" },
+    ...offers,
+    { "@type": "FAQPage", mainEntity: FAQ.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+    { "@type": "WebPage", "@id": PAGE + "#webpage", url: PAGE, name: TITLE, description: DESC, inLanguage: "en-IN", isPartOf: { "@id": SITE + "/#website" }, about: { "@id": SITE + "/#org" }, breadcrumb: { "@id": PAGE + "#breadcrumb" } },
+    { "@type": "BreadcrumbList", "@id": PAGE + "#breadcrumb", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE + "/" }, { "@type": "ListItem", position: 2, name: "Solutions", item: PAGE }] },
+  ] };
+  return (<>
+    <title>{TITLE}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={DESC} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#07091c" />
+    <link rel="canonical" href={PAGE} />
+    <meta property="og:type" content="website" /><meta property="og:title" content={TITLE} /><meta property="og:description" content={DESC} /><meta property="og:url" content={PAGE} />
+    <meta property="og:site_name" content="NovaTech Innovative Solutions" /><meta property="og:locale" content="en_IN" /><meta property="og:image" content={OG_IMAGE} />
+    <meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="NovaTech Innovative Solutions: IoT, website and mobile app development" />
+    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content={TITLE} /><meta name="twitter:description" content={DESC} /><meta name="twitter:image" content={OG_IMAGE} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;700&display=swap" />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
+  </>);
 };
 
-export default About;
+const CSS = `
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}body{font-family:${T.body};color:${T.text};line-height:1.65;background:#fff}a{color:inherit}
+main{overflow-x:clip}
+:focus-visible{outline:3px solid ${T.blue};outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sec{padding:80px 5%;scroll-margin-top:64px}.in{max-width:1200px;margin:auto}.light{background:${T.off}}
+.h2{font-family:${T.head};font-weight:800;color:${T.navy};font-size:clamp(1.5rem,3vw,2.3rem);line-height:1.18;letter-spacing:-.025em;margin-bottom:12px;overflow-wrap:break-word}
+.sub{color:${T.muted};max-width:680px;font-weight:300}
+.btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:700;font-size:.95rem;text-decoration:none;font-family:${T.head};transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}.btn-y{background:${T.yellow};color:${T.navy}}.btn-n{background:${T.navy};color:#fff}.btn-o{border:2px solid ${T.navy};color:${T.navy};margin-left:10px}
+.hero{background:linear-gradient(135deg,#eef3ff,#fff 62%);border-bottom:1px solid ${T.border};padding:56px 5% 72px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:linear-gradient(${T.blue},${T.yellow})}
+.crumbs{max-width:1200px;margin:0 auto 34px;font-size:.85rem;color:${T.muted}}.crumbs ol{list-style:none;display:flex;flex-wrap:wrap;gap:8px}.crumbs li+li::before{content:"/";margin-right:8px}.crumbs a{text-decoration:none;display:inline-block;padding:8px 0}.crumbs a:hover{text-decoration:underline}
+.hero-in{max-width:1200px;margin:auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center}
+.badge{display:inline-block;background:${T.blueLight};border:1px solid #c2d0f8;border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:700;color:${T.blue};margin-bottom:18px}
+.h1{font-family:${T.head};font-weight:800;color:${T.navy};font-size:clamp(1.9rem,3.8vw,3.1rem);line-height:1.1;letter-spacing:-.035em;margin-bottom:18px;overflow-wrap:break-word}
+.h1 em{font-style:normal;background:linear-gradient(90deg,${T.blue},#6a8cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:${T.muted};font-weight:300;font-size:1.05rem;max-width:560px;margin-bottom:26px}
+.hero-art{display:block;width:100%;max-width:420px;margin:auto;min-width:0;filter:drop-shadow(0 20px 40px rgba(19,70,232,.15))}.hero-art img{display:block;width:100%;height:auto}
+.tabs{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid ${T.border};padding:10px 5%}
+.tabs ul{max-width:1200px;margin:auto;list-style:none;display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.tabs a{display:flex;align-items:center;min-height:44px;white-space:nowrap;padding:8px 18px;border-radius:100px;border:1px solid ${T.border};font-weight:700;font-size:.85rem;text-decoration:none;color:${T.navy};font-family:${T.head}}
+.tabs a:hover{background:${T.blueLight};border-color:#c2d0f8}
+.pop{list-style:none;display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.pop a{display:inline-flex;align-items:center;min-height:44px;padding:8px 16px;border-radius:100px;background:#fff;border:1px solid ${T.border};font-size:.88rem;font-weight:700;color:${T.blue};text-decoration:none}
+.pop a:hover{background:${T.blueLight};border-color:#c2d0f8}
+.ghead{display:flex;align-items:center;gap:18px;margin-bottom:10px}
+.ico{flex:none;width:60px;height:60px;border-radius:18px;background:${T.blueLight};color:${T.blue};display:flex;align-items:center;justify-content:center}.ico svg{width:32px;height:32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:22px;margin-top:36px}
+.card{background:#fff;border:1px solid ${T.border};border-top:4px solid ${T.blue};border-radius:18px;padding:26px;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s;scroll-margin-top:72px}
+.card:nth-child(even){border-top-color:${T.yellow}}.card:hover{transform:translateY(-5px);box-shadow:0 16px 44px rgba(19,70,232,.13)}
+.card h3{font-family:${T.head};font-size:1.12rem;color:${T.navy};margin-bottom:6px;overflow-wrap:break-word}.card>p{color:${T.muted};font-size:.9rem;margin-bottom:14px}
+.card>.brand{color:${T.blue};font-size:.8rem;font-weight:700;margin:-2px 0 8px}
+.card ul{list-style:none;margin-bottom:18px;flex:1}.card li{font-size:.88rem;padding-left:22px;position:relative;margin-bottom:4px}.card li::before{content:"✓";position:absolute;left:0;color:${T.blue};font-weight:700}
+.price{border-top:1px dashed ${T.border};padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.price small{color:${T.muted};font-size:.8rem;display:block}.price b{font-family:${T.head};font-size:1.05rem;color:${T.navy}}
+.quote{display:inline-flex;align-items:center;min-height:44px;font-weight:700;color:${T.blue};text-decoration:none;font-size:.9rem}.quote:hover{text-decoration:underline}
+.note{margin-top:30px;background:${T.blueLight};border-left:4px solid ${T.blue};border-radius:10px;padding:16px 20px;font-size:.9rem;color:${T.navy}}
+.steps{list-style:none;counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:20px;margin-top:36px}
+.steps li{counter-increment:s;background:#fff;border:1px solid ${T.border};border-radius:16px;padding:24px}
+.steps li::before{content:counter(s);display:flex;width:34px;height:34px;border-radius:50%;background:${T.blue};color:#fff;font-weight:700;align-items:center;justify-content:center;margin-bottom:12px}
+.steps h3{font-family:${T.head};font-size:1.05rem;color:${T.navy};margin-bottom:6px}.steps p{font-size:.9rem;color:${T.muted}}
+.faq{max-width:860px;margin-top:30px}.faq details{background:#fff;border:1px solid ${T.border};border-radius:12px;padding:6px 20px;margin-bottom:12px}
+.faq summary{display:flex;align-items:center;min-height:48px;font-family:${T.head};font-weight:700;color:${T.navy};cursor:pointer}.faq p{color:${T.muted};margin:0 0 14px;font-size:.93rem}
+.links{margin-top:28px;display:flex;gap:6px 22px;flex-wrap:wrap}.links a{display:inline-block;padding:10px 0;font-weight:700;color:${T.blue};text-decoration:none}.links a:hover{text-decoration:underline}
+.cta{background:${T.yellow};padding:50px 5%}.cta-in{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:22px}
+.cta h2{font-family:${T.head};font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:${T.navy}}.cta p{color:rgba(10,15,46,.8)}
+@media(max-width:860px){
+.hero-in{grid-template-columns:minmax(0,1fr);gap:28px}
+.hero-art{display:none}
+.btn-o{margin:12px 0 0}
+}
+@media(max-width:600px){
+.sec{padding:56px 5%}
+.hero{padding:28px 5% 48px}.hero::before{width:5px}
+.crumbs{margin-bottom:20px}
+.btn{display:block;text-align:center}
+.ico{width:48px;height:48px;border-radius:14px}.ico svg{width:26px;height:26px}.ghead{gap:12px}
+.card{padding:22px 20px}
+.cta{padding:40px 5%}.cta .btn{width:100%}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+`;
+
+const Solutions = () => (
+  <main id="top">
+    <style>{CSS}</style>
+    <Seo />
+
+    <section className="hero" aria-labelledby="sol-h">
+           <div className="hero-in">
+        <div>
+          <p className="badge">Free quote within 24 hours</p>
+          <h1 className="h1" id="sol-h">IoT, Web &amp; Mobile App <em>Development Services</em></h1>
+          <p className="lead">From smart home automation, RFID attendance and fire alarm systems to company websites, e-commerce stores and Flutter mobile apps, NovaTech builds practical solutions in India and sends you a clear written quote before we start.</p>
+          <a href="/contact" className="btn btn-y">Get a free quote</a>
+          <a href={WA} className="btn btn-o" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
+        </div>
+        <Hero4 />
+      </div>
+    </section>
+
+    <nav className="tabs" aria-label="Solution categories">
+      <ul>{GROUPS.map((g) => <li key={g.id}><a href={"#" + g.id}>{g.tab}</a></li>)}</ul>
+    </nav>
+
+    <section className="sec" aria-labelledby="pop-h">
+      <div className="in">
+        <h2 className="h2" id="pop-h">Popular IoT, website and app requests</h2>
+        <p className="sub">Jump straight to the solution people ask us for most.</p>
+        <ul className="pop">{POPULAR.map((n) => <li key={n}><a href={"#" + slug(n)}>{n}</a></li>)}</ul>
+      </div>
+    </section>
+
+    {GROUPS.map((g, gi) => (
+      <section key={g.id} id={g.id} className={"sec" + (gi % 2 === 0 ? " light" : "")} aria-labelledby={g.id + "-h"}>
+        <div className="in">
+          <div className="ghead"><div className="ico"><Ico n={g.icon} /></div><h2 className="h2" id={g.id + "-h"} style={{ margin: 0 }}>{g.title}</h2></div>
+          <p className="sub">{g.intro}</p>
+          <div className="grid">
+            {g.items.map(([n, d, note, inc, brand]) => (
+              <article className="card" key={n} id={slug(n)}>
+                <h3>{n}</h3>
+                {brand && <p className="brand">NovaTech product: {brand}</p>}
+                <p>{d}</p>
+                <ul aria-label={"What is included in " + n}>{inc.map((x) => <li key={x}>{x}</li>)}</ul>
+                <div className="price"><div><b>Free quote</b><small>{note}</small></div><a className="quote" href={"/contact?solution=" + encodeURIComponent(n)}>Get a quote<span className="sr"> for {n}</span> →</a></div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    ))}
+
+    <section className="sec" aria-labelledby="how-h">
+      <div className="in">
+        <h2 className="h2" id="how-h">How ordering works</h2>
+        <ol className="steps">{STEPS.map(([t, d]) => (<li key={t}><h3>{t}</h3><p>{d}</p></li>))}</ol>
+        <p className="note"><strong>About quotes:</strong> the final cost depends on features, hardware, number of pages or screens and timeline. You get a fixed written quote before we begin, with no commitment.</p>
+      </div>
+    </section>
+
+    <section className="sec light" aria-labelledby="faq-h">
+      <div className="in">
+        <h2 className="h2" id="faq-h">IoT, web and app development: common questions</h2>
+        <div className="faq">{FAQ.map(([q, a]) => (<details key={q}><summary>{q}</summary><p>{a}</p></details>))}</div>
+        <nav className="links" aria-label="Related pages">
+          <a href="/about">About NovaTech</a><a href="/projects">See our projects</a><a href="/training">Student training</a><a href="/research-development">Research &amp; development</a>
+        </nav>
+      </div>
+    </section>
+
+    <section className="cta" aria-labelledby="cta-h">
+      <div className="cta-in">
+        <div><h2 id="cta-h">Have a device, app or website in mind?</h2><p>Tell us what you need. We reply within 24 hours with a plan and a quote.</p></div>
+        <a href="/contact" className="btn btn-n">Request a quote</a>
+      </div>
+    </section>
+  </main>
+);
+
+export default Solutions;

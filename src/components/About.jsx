@@ -1,714 +1,287 @@
-import React, { useEffect } from "react";
+import React from "react";
 
-/* ─────────────────────────────────────────────────────────────
-   DESIGN TOKENS — identical to Home.jsx
-   ───────────────────────────────────────────────────────────── */
-const T = {
-  navy:      "#07091c",
-  navyMid:   "#0d1236",
-  blue:      "#1346e8",
-  blueLight: "#e8effe",
-  yellow:    "#f5c518",
-  white:     "#ffffff",
-  offWhite:  "#f7f8fc",
-  border:    "#e4e8f0",
-  text:      "#111827",
-  muted:     "#6b7280",
-  fontHead:  "'Syne', sans-serif",
-  fontBody:  "'DM Sans', sans-serif",
+/* NovaTech IS — combined About + Services page (route: /about).
+   Same tokens/head handling as Home.jsx (React 19 hoists <title>/<meta>; on React 18 wrap <Seo/> in react-helmet-async <Helmet>).
+   Pillar hrefs match the routes used on the Home page. */
+
+const SITE = "https://www.novatechinnovative.com";
+const PAGE = SITE + "/about";
+const TITLE = "NovaTech IS | IoT, AI/ML Solutions, Training & R&D in India";
+const DESC = "NovaTech Innovative Solutions builds IoT and AI/ML products, trains students and supports research. See our services, projects, mission and founder.";
+const OG_IMAGE = SITE + "/og-image.png";
+const LINKEDIN = "https://www.linkedin.com/in/chandramouli01/";
+const WA = "https://wa.me/918336001208?text=" + encodeURIComponent("Hello, I want to discuss a project with NovaTech!");
+const EM = "mailto:chandramoulihaldar@gmail.com";
+
+const T = { navy: "#07091c", blue: "#1346e8", blueLight: "#e8effe", yellow: "#f5c518", off: "#f7f8fc", border: "#e4e8f0", text: "#111827", muted: "#5b6472", head: "'Syne', sans-serif", body: "'DM Sans', sans-serif" };
+
+const PILLARS = [
+  { id: "solutions", icon: "chip", href: "/features", cta: "Explore Solutions", title: "Hardware & Software Solutions", pitch: "Practical technology, from prototype to product.", best: "Start-ups, small businesses and individuals.",
+    svcs: [["IoT and embedded systems", "Sensors, firmware and connected devices that work in the field."], ["PCB design and prototyping", "Custom boards and testable prototypes."], ["AI/ML and Edge AI", "Models that run on the device, including TinyML."], ["Web and mobile apps", "MERN, Java and Flutter apps built around your users."], ["Automation, robotics, cybersecurity", "Smart systems for real-world use."]] },
+  { id: "training", icon: "grad", href: "/training", cta: "Explore Training", title: "Student Training & Internships", pitch: "Skills built by doing real work.", best: "Students, graduates and colleges.",
+    svcs: [["Training and bootcamps", "IoT, AI/ML, embedded, robotics and full-stack."], ["Internships", "Guided, project-based learning."], ["College workshops and hackathons", "Beyond-curriculum training for universities."]] },
+  { id: "research", icon: "flask", href: "/lab", cta: "Explore R&D", title: "Research & Development", pitch: "Ideas turned into research outcomes.", best: "Researchers, academics and industry partners.",
+    svcs: [["Proofs of concept", "Test an idea before a full build."], ["AI, IoT and embedded research", "Including industry-sponsored work."], ["Project mentoring", "Thesis, paper and patent documentation guidance."], ["Publications", "Books, chapters, lab manuals and workshop material."]] },
+];
+
+const PROJECTS = [
+  ["IoT Fire Alarm System", "IoT · Safety", "/img/gasSmoke.jpeg", "MQ-2 and DHT11 sensing with instant alerts and a buzzer.", ["ESP8266", "MQ-2", "Blynk"]],
+  ["IoT Solar Charging Bag", "IoT · Green Tech", "/img/solarbag.jpeg", "MPPT charging with a real-time energy dashboard.", ["ESP32", "MPPT", "MQTT"]],
+  ["Secret Morse Communication", "Embedded · Security", "/img/morsecode.png", "Encodes and decodes messages over RF and LED.", ["Arduino", "RF", "LCD"]],
+];
+
+const TRAIN = [["/img/surtech.jpg", "IoT and embedded systems training: students working with NodeMCU and sensors", "IoT & ES Beyond Curriculum Training"], ["/img/jisce.png", "VLSI and embedded training session in an engineering college lab", "VLSI Beyond Curriculum Training"]];
+
+const FEEDBACK = [["/img/client1.jpeg", "Written feedback from a student for a completed 7th semester personal project", "Completed Personal Project for 7th Semester"], ["/img/client2.jpeg", "Written feedback from a student for a final year project and research paper", "Complete Final Year Project + Research Paper"]];
+
+const STEPS = [["Share your idea", "Tell us what to build, learn or research. Consultation is free."], ["Get a clear plan", "Plan, timeline and pricing within 24 hours."], ["Build with milestones", "Regular updates keep you in the loop."], ["Deliver", "From validation to final deployment."]];
+
+// VERIFY: publish only figures you can back up.
+const STATS = [["20+", "Projects delivered"], ["200+", "Students trained"], ["5+", "Universities reached"], ["24h", "Typical reply time"]];
+
+// VERIFY: use only real, permitted testimonials (full name/consent preferred). Empty the array to hide.
+const QUOTES = [["Built a complete IoT attendance system for my final-year project, from hardware to report and presentation.", "Rohan M.", "Final-year B.Tech student"], ["Delivered a working TinyML health-monitoring prototype for my thesis within the deadline.", "Priya S.", "M.Tech research scholar"], ["The embedded systems workshop was hands-on and clear. I built my first IoT project in two days.", "Sneha D.", "Diploma student, Electronics"]];
+
+const PATHS = { chip: "M7 7h10v10H7zM9 7V4M12 7V4M15 7V4M9 20v-3M12 20v-3M15 20v-3M7 9H4M7 12H4M7 15H4M20 9h-3M20 12h-3M20 15h-3", grad: "M22 10 12 5 2 10l10 5zM22 10v6M6 12v5c3 3 9 3 12 0v-5", flask: "M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3M7.5 15h9" };
+const Ico = ({ n }) => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={PATHS[n]} /></svg>);
+
+/* Hero graphic: shown on desktop only.
+   On screens <= 860px the <source> swaps in a 1x1 transparent GIF so the SVG is never downloaded,
+   and CSS (.hero-art) hides the element as well. */
+const BLANK = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+const Hero3 = () => (
+  <picture className="hero-art">
+    <source media="(max-width: 860px)" srcSet={BLANK} />
+    <img src="/novatech-services.svg" alt="NovaTech Innovative Solutions: Solutions, Training and R&D" fetchPriority="high" decoding="async" />
+  </picture>
+);
+
+const Seo = () => {
+  const graph = { "@context": "https://schema.org", "@graph": [
+    { "@type": "Organization", "@id": SITE + "/#org", name: "NovaTech Innovative Solutions", alternateName: "NovaTech IS", url: SITE, slogan: "From Ideas to Innovation", description: DESC, areaServed: { "@type": "Country", name: "India" }, founder: { "@id": SITE + "/#founder" } },
+    { "@type": "WebSite", "@id": SITE + "/#website", name: "NovaTech Innovative Solutions", url: SITE, inLanguage: "en-IN", publisher: { "@id": SITE + "/#org" } },
+    { "@type": "Person", "@id": SITE + "/#founder", name: "Chandramouli Haldar", jobTitle: "Founder & CEO", image: SITE + "/CEO_DP.jpg", sameAs: [LINKEDIN], worksFor: { "@id": SITE + "/#org" } },
+    ...PILLARS.map((p) => ({ "@type": "Service", "@id": SITE + p.href + "#service", name: p.title, description: p.pitch + " " + p.svcs.map((x) => x[0]).join(", ") + ".", url: SITE + p.href, provider: { "@id": SITE + "/#org" }, areaServed: { "@type": "Country", name: "India" } })),
+    { "@type": "ItemList", name: "NovaTech featured projects", itemListElement: PROJECTS.map((p, i) => ({ "@type": "ListItem", position: i + 1, name: p[0], description: p[3], image: SITE + p[2] })) },
+    { "@type": "AboutPage", "@id": PAGE + "#webpage", url: PAGE, name: TITLE, description: DESC, inLanguage: "en-IN", isPartOf: { "@id": SITE + "/#website" }, about: { "@id": SITE + "/#org" }, mainEntity: { "@id": SITE + "/#org" }, breadcrumb: { "@id": PAGE + "#breadcrumb" } },
+    { "@type": "BreadcrumbList", "@id": PAGE + "#breadcrumb", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE + "/" }, { "@type": "ListItem", position: 2, name: "About", item: PAGE }] },
+  ] };
+  return (<>
+    <title>{TITLE}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={DESC} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#07091c" />
+    <link rel="canonical" href={PAGE} />
+    <meta property="og:type" content="website" /><meta property="og:title" content={TITLE} /><meta property="og:description" content={DESC} /><meta property="og:url" content={PAGE} />
+    <meta property="og:site_name" content="NovaTech Innovative Solutions" /><meta property="og:locale" content="en_IN" /><meta property="og:image" content={OG_IMAGE} />
+    <meta property="og:image:width" content="1200" /><meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="NovaTech Innovative Solutions: IoT, AI/ML solutions, training and R&D" />
+    <meta name="twitter:card" content="summary_large_image" /><meta name="twitter:title" content={TITLE} /><meta name="twitter:description" content={DESC} /><meta name="twitter:image" content={OG_IMAGE} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;700&display=swap" />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }} />
+  </>);
 };
 
-/* ─────────────────────────────────────────────────────────────
-   GLOBAL CSS — same system as Home.jsx
-   ───────────────────────────────────────────────────────────── */
-const ABOUT_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  body { font-family: ${T.fontBody}; background: ${T.white}; color: ${T.text}; line-height: 1.65; }
-
-  /* ── Reveal animation ── */
-  .nt-reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
-  .nt-reveal.nt-visible { opacity: 1; transform: none; }
-  .nt-reveal-d1 { transition-delay: 0.1s !important; }
-  .nt-reveal-d2 { transition-delay: 0.2s !important; }
-  .nt-reveal-d3 { transition-delay: 0.3s !important; }
-  .nt-reveal-d4 { transition-delay: 0.4s !important; }
-  .nt-reveal-d5 { transition-delay: 0.5s !important; }
-  .nt-reveal-d6 { transition-delay: 0.6s !important; }
-
-  /* ── About Hero banner ── */
-  .about-hero {
-    background: ${T.navy}; padding: 80px 5% 90px;
-    position: relative; overflow: hidden;
-  }
-  .about-hero::before {
-    content: ''; position: absolute; inset: 0; pointer-events: none;
-    background:
-      radial-gradient(ellipse 50% 60% at 80% 50%, rgba(19,70,232,0.2) 0%, transparent 70%),
-      radial-gradient(ellipse 25% 35% at 5% 70%, rgba(245,197,24,0.07) 0%, transparent 60%);
-  }
-  .about-hero-inner {
-    max-width: 1200px; margin: auto; position: relative; z-index: 1;
-    display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center;
-  }
-  .about-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(245,197,24,0.12); border: 1px solid rgba(245,197,24,0.3);
-    border-radius: 100px; padding: 5px 14px;
-    font-size: 0.78rem; font-weight: 600; color: ${T.yellow};
-    letter-spacing: 0.04em; margin-bottom: 24px;
-  }
-  .about-h1 {
-    font-family: ${T.fontHead}; font-weight: 800; color: #fff;
-    font-size: clamp(2rem, 3.8vw, 3.2rem); line-height: 1.1;
-    letter-spacing: -0.035em; margin-bottom: 22px;
-  }
-  .about-h1 em { font-style: normal; color: ${T.yellow}; }
-  .about-hero-desc {
-    font-size: 1.05rem; color: rgba(255,255,255,0.6);
-    max-width: 500px; font-weight: 300; line-height: 1.78; margin-bottom: 36px;
-  }
-  .about-hero-cta {
-    background: ${T.yellow}; color: ${T.navy};
-    padding: 13px 28px; border-radius: 8px;
-    font-size: 0.95rem; font-weight: 700; font-family: ${T.fontHead};
-    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    transition: opacity 0.2s, transform 0.15s;
-  }
-  .about-hero-cta:hover { opacity: 0.88; transform: translateY(-2px); }
-
-  /* Hero right — CEO card */
-  .ceo-hero-card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px; padding: 32px;
-    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px;
-  }
-  .ceo-avatar {
-    width: 110px; height: 110px; border-radius: 50%;
-    border: 3px solid ${T.yellow}; object-fit: cover;
-    display: block;
-  }
-  .ceo-hero-name {
-    font-family: ${T.fontHead}; font-size: 1.15rem; font-weight: 800; color: #fff;
-  }
-  .ceo-hero-role {
-    font-size: 0.82rem; color: ${T.yellow}; font-weight: 600;
-    letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px;
-  }
-  .ceo-hero-quote {
-    font-size: 0.9rem; color: rgba(255,255,255,0.6); font-style: italic;
-    line-height: 1.72; border-top: 1px solid rgba(255,255,255,0.1);
-    padding-top: 16px; margin-top: 4px;
-  }
-
-  /* ── Trust bar ── */
-  .nt-trust { background: ${T.yellow}; padding: 13px 5%; }
-  .nt-trust-inner {
-    max-width: 1200px; margin: auto;
-    display: flex; justify-content: center; align-items: center;
-    gap: 44px; flex-wrap: wrap;
-  }
-  .nt-trust-item {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 0.82rem; font-weight: 700; color: ${T.navy};
-  }
-
-  /* ── Section wrappers ── */
-  .nt-section { padding: 96px 5%; }
-  .nt-section-inner { max-width: 1200px; margin: auto; }
-  .nt-section-label {
-    font-size: 0.75rem; font-weight: 700; color: ${T.blue};
-    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
-  }
-  .nt-section-title {
-    font-family: ${T.fontHead}; font-weight: 800; color: ${T.navy};
-    font-size: clamp(1.6rem, 3vw, 2.4rem); line-height: 1.18;
-    letter-spacing: -0.025em; margin-bottom: 14px;
-  }
-  .nt-section-sub {
-    font-size: 1rem; color: ${T.muted}; max-width: 600px;
-    font-weight: 300; line-height: 1.78;
-  }
-
-  /* ── Services / Features grid ── */
-  .about-bg-white { background: ${T.white}; }
-  .about-bg-off   { background: ${T.offWhite}; }
-  .about-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px; margin-top: 52px;
-  }
-  .about-card {
-    background: ${T.offWhite}; border: 1px solid ${T.border};
-    border-radius: 20px; overflow: hidden;
-    transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
-    cursor: default; display: flex; flex-direction: column;
-  }
-  .about-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 48px rgba(19,70,232,0.1);
-    border-color: #c2d0f8;
-  }
-  .about-card-img-wrap { position: relative; height: 180px; overflow: hidden; }
-  .about-card-img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform 0.4s ease;
-  }
-  .about-card:hover .about-card-img { transform: scale(1.04); }
-  .about-card-badge {
-    position: absolute; top: 12px; left: 12px;
-    background: ${T.yellow}; color: ${T.navy};
-    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; padding: 4px 10px; border-radius: 100px;
-  }
-  .about-card-body { padding: 24px 24px 28px; flex: 1; display: flex; flex-direction: column; }
-  .about-card-icon {
-    width: 40px; height: 40px; border-radius: 9px;
-    background: ${T.blueLight}; display: flex; align-items: center;
-    justify-content: center; margin-bottom: 14px; flex-shrink: 0;
-  }
-  .about-card-icon svg { width: 20px; height: 20px; color: ${T.blue}; }
-  .about-card-title {
-    font-family: ${T.fontHead}; font-size: 1.05rem; font-weight: 700;
-    color: ${T.navy}; margin-bottom: 8px;
-  }
-  .about-card-text { font-size: 0.875rem; color: ${T.muted}; line-height: 1.72; flex: 1; }
-  .about-card-link {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 0.82rem; font-weight: 600; color: ${T.blue};
-    text-decoration: none; margin-top: 16px;
-  }
-  .about-card-link svg { width: 13px; height: 13px; }
-
-  /* ── Mission / Vision strip ── */
-  .mv-strip {
-    background: ${T.navy}; border-radius: 20px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
-    overflow: hidden; margin-top: 52px;
-  }
-  .mv-block { padding: 40px 36px; }
-  .mv-block + .mv-block { border-left: 1px solid rgba(255,255,255,0.08); }
-  .mv-label {
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: ${T.yellow}; margin-bottom: 12px;
-  }
-  .mv-title {
-    font-family: ${T.fontHead}; font-size: 1.4rem; font-weight: 800;
-    color: #fff; margin-bottom: 14px; line-height: 1.2;
-  }
-  .mv-text { font-size: 0.9rem; color: rgba(255,255,255,0.58); line-height: 1.75; }
-
-  /* ── CEO full section ── */
-  .ceo-section { background: ${T.offWhite}; }
-  .ceo-inner {
-    max-width: 1200px; margin: auto;
-    display: grid; grid-template-columns: 340px 1fr; gap: 64px; align-items: start;
-  }
-  .ceo-card {
-    background: ${T.white}; border: 1px solid ${T.border};
-    border-radius: 20px; padding: 36px; text-align: center;
-    position: sticky; top: 84px;
-  }
-  .ceo-photo {
-    width: 130px; height: 130px; border-radius: 50%;
-    border: 3px solid ${T.yellow}; object-fit: cover;
-    margin: 0 auto 18px; display: block;
-  }
-  .ceo-name {
-    font-family: ${T.fontHead}; font-size: 1.2rem; font-weight: 800;
-    color: ${T.navy}; margin-bottom: 4px;
-  }
-  .ceo-role {
-    font-size: 0.78rem; font-weight: 700; color: ${T.blue};
-    letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 18px;
-  }
-  .ceo-divider { border: none; border-top: 1px solid ${T.border}; margin: 18px 0; }
-  .ceo-stat { margin-bottom: 12px; }
-  .ceo-stat-num {
-    font-family: ${T.fontHead}; font-size: 1.6rem; font-weight: 800; color: ${T.yellow};
-  }
-  .ceo-stat-lbl { font-size: 0.75rem; color: ${T.muted}; margin-top: 2px; }
-  .ceo-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .ceo-socials { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
-  .ceo-social-btn {
-    width: 36px; height: 36px; border-radius: 8px;
-    background: ${T.blueLight}; color: ${T.blue};
-    display: flex; align-items: center; justify-content: center;
-    text-decoration: none; transition: background 0.2s;
-  }
-  .ceo-social-btn:hover { background: ${T.blue}; color: #fff; }
-  .ceo-social-btn svg { width: 16px; height: 16px; }
-
-  .ceo-content { display: flex; flex-direction: column; gap: 24px; padding-top: 8px; }
-  .ceo-msg-title {
-    font-family: ${T.fontHead}; font-size: 1.8rem; font-weight: 800;
-    color: ${T.navy}; line-height: 1.2; letter-spacing: -0.025em; margin-bottom: 6px;
-  }
-  .ceo-msg-title em { font-style: normal; color: ${T.blue}; }
-  .ceo-para { font-size: 0.95rem; color: ${T.muted}; line-height: 1.82; font-weight: 300; }
-  .ceo-quote-block {
-    background: ${T.navy}; border-radius: 16px; padding: 28px 32px;
-    position: relative; overflow: hidden;
-  }
-  .ceo-quote-block::before {
-    content: '"';
-    position: absolute; top: -10px; left: 16px;
-    font-family: ${T.fontHead}; font-size: 7rem; font-weight: 800;
-    color: rgba(245,197,24,0.12); line-height: 1; pointer-events: none;
-  }
-  .ceo-quote-text {
-    font-family: ${T.fontHead}; font-size: 1.15rem; font-weight: 600;
-    color: #fff; line-height: 1.55; position: relative; z-index: 1;
-  }
-  .ceo-quote-attr {
-    font-size: 0.8rem; color: ${T.yellow}; font-weight: 600;
-    margin-top: 14px; letter-spacing: 0.04em;
-  }
-  .ceo-values { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .ceo-value-chip {
-    background: ${T.blueLight}; border: 1px solid rgba(19,70,232,0.12);
-    border-radius: 10px; padding: 14px 16px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .ceo-value-icon {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: ${T.blue}; color: #fff;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .ceo-value-icon svg { width: 15px; height: 15px; }
-  .ceo-value-label { font-size: 0.83rem; font-weight: 600; color: ${T.navy}; }
-
-  /* ── Numbers section ── */
-  .nums-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px; margin-top: 52px;
-  }
-  .num-card {
-    background: ${T.white}; border: 1px solid ${T.border};
-    border-radius: 16px; padding: 28px 24px; text-align: center;
-    transition: transform 0.22s, border-color 0.22s;
-  }
-  .num-card:hover { transform: translateY(-4px); border-color: #c2d0f8; }
-  .num-card.accent { background: ${T.navy}; border-color: transparent; }
-  .num-card.accent .num-val { color: ${T.yellow}; }
-  .num-card.accent .num-lbl { color: rgba(255,255,255,0.55); }
-  .num-val {
-    font-family: ${T.fontHead}; font-size: 2.6rem; font-weight: 800;
-    color: ${T.blue}; letter-spacing: -0.03em;
-  }
-  .num-lbl { font-size: 0.85rem; color: ${T.muted}; margin-top: 6px; line-height: 1.4; }
-
-  /* ── CTA footer strip ── */
-  .about-cta {
-    background: ${T.yellow}; padding: 56px 5%;
-  }
-  .about-cta-inner {
-    max-width: 1200px; margin: auto;
-    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;
-  }
-  .about-cta h2 {
-    font-family: ${T.fontHead}; font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 800; color: ${T.navy}; letter-spacing: -0.02em;
-  }
-  .about-cta p { font-size: 0.95rem; color: rgba(10,15,46,0.6); margin-top: 6px; }
-  .about-cta-btn {
-    background: ${T.navy}; color: #fff;
-    padding: 13px 28px; border-radius: 8px;
-    font-family: ${T.fontHead}; font-size: 0.95rem; font-weight: 700;
-    text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    transition: opacity 0.2s, transform 0.15s; white-space: nowrap;
-  }
-  .about-cta-btn:hover { opacity: 0.85; transform: translateY(-2px); }
-
-  /* ── Footer ── */
-  .nt-footer { background: #06071a; padding: 36px 5%; border-top: 1px solid rgba(255,255,255,0.06); }
-  .nt-footer-inner {
-    max-width: 1200px; margin: auto;
-    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
-  }
-  .nt-footer-logo { font-family: ${T.fontHead}; font-size: 1.1rem; font-weight: 800; color: #fff; }
-  .nt-footer-logo em { font-style: normal; color: ${T.yellow}; }
-  .nt-footer-copy { font-size: 0.78rem; color: rgba(255,255,255,0.3); }
-  .nt-footer-links { display: flex; gap: 22px; }
-  .nt-footer-links a { font-size: 0.8rem; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.2s; }
-  .nt-footer-links a:hover { color: rgba(255,255,255,0.8); }
-
-  /* ── Responsive ── */
-  @media (max-width: 860px) {
-    .about-hero-inner { grid-template-columns: 1fr; }
-    .ceo-hero-card { display: none; }
-    .ceo-inner { grid-template-columns: 1fr; gap: 40px; }
-    .ceo-card { position: static; }
-    .mv-strip { grid-template-columns: 1fr; }
-    .mv-block + .mv-block { border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
-    .nt-nav-links { display: none; }
-    .ceo-values { grid-template-columns: 1fr; }
-    .about-cta-inner { flex-direction: column; align-items: flex-start; }
-  }
+const CSS = `
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}body{font-family:${T.body};color:${T.text};line-height:1.65;background:#fff}a{color:inherit}
+main{overflow-x:clip}
+:focus-visible{outline:3px solid ${T.blue};outline-offset:3px}
+.dark :focus-visible{outline-color:${T.yellow}}
+.sec{padding:88px 5%}.in{max-width:1200px;margin:auto}.light{background:${T.off}}.dark{background:${T.navy}}
+.h2{font-family:${T.head};font-weight:800;color:${T.navy};font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.18;letter-spacing:-.025em;margin-bottom:14px;overflow-wrap:break-word}
+.sub{color:${T.muted};max-width:640px;font-weight:300}
+.btn{display:inline-block;padding:13px 28px;border-radius:8px;font-weight:700;font-size:.95rem;text-decoration:none;font-family:${T.head};transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}.btn-y{background:${T.yellow};color:${T.navy}}.btn-o{border:2px solid ${T.navy};color:${T.navy};margin-left:10px}
+.plink{display:inline-block;padding:10px 0;font-weight:700;color:${T.blue};text-decoration:none}.plink:hover{text-decoration:underline}
+.hero{background:linear-gradient(135deg,#eef3ff,#fff 62%);border-bottom:1px solid ${T.border};padding:56px 5% 80px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:linear-gradient(${T.blue},${T.yellow})}
+.crumbs{max-width:1200px;margin:0 auto 36px;font-size:.85rem;color:${T.muted}}.crumbs ol{list-style:none;display:flex;flex-wrap:wrap;gap:8px}.crumbs li+li::before{content:"/";margin-right:8px}.crumbs a{text-decoration:none;display:inline-block;padding:8px 0}.crumbs a:hover{text-decoration:underline}
+.hero-in{max-width:1200px;margin:auto;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center}
+.badge{display:inline-block;background:${T.blueLight};border:1px solid #c2d0f8;border-radius:100px;padding:5px 14px;font-size:.8rem;font-weight:700;color:${T.blue};margin-bottom:18px}
+.h1{font-family:${T.head};font-weight:800;color:${T.navy};font-size:clamp(1.9rem,3.8vw,3.2rem);line-height:1.1;letter-spacing:-.035em;margin-bottom:18px;overflow-wrap:break-word}
+.h1 em{font-style:normal;background:linear-gradient(90deg,${T.blue},#6a8cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:${T.muted};font-weight:300;font-size:1.05rem;max-width:560px;margin-bottom:28px}
+.hero-art{display:block;width:100%;max-width:440px;margin:auto;min-width:0}.hero-art img{display:block;width:100%;height:auto}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:18px;max-width:1200px;margin:auto}
+.stats div{border-left:3px solid ${T.yellow};padding:4px 0 4px 18px}.stats b{display:block;font-family:${T.head};font-size:2.2rem;color:#fff}.stats span{color:rgba(255,255,255,.78);font-size:.88rem}
+.rows{display:flex;flex-direction:column;gap:26px;margin-top:44px}
+.row{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:44px;background:#fff;border:1px solid ${T.border};border-left:6px solid ${T.blue};border-radius:20px;padding:36px}
+.row:nth-child(2){border-left-color:${T.yellow}}.row:nth-child(3){border-left-color:${T.navy}}
+.ico{width:64px;height:64px;border-radius:18px;background:${T.blueLight};color:${T.blue};display:flex;align-items:center;justify-content:center}.ico svg{width:34px;height:34px}
+.row h3{font-family:${T.head};font-size:1.5rem;color:${T.navy};margin:14px 0 8px}.best{font-size:.9rem;margin:12px 0 16px}
+.svcs{list-style:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}.svcs li{border-left:3px solid ${T.yellow};padding-left:14px}
+.svcs b{display:block;font-family:${T.head};font-size:.98rem;color:${T.navy}}.svcs span{font-size:.87rem;color:${T.muted}}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:24px;margin-top:44px}
+.pc{background:#fff;border:1px solid ${T.border};border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:transform .25s,box-shadow .25s}
+.pc:hover{transform:translateY(-6px);box-shadow:0 18px 48px rgba(19,70,232,.14)}
+.pc img{width:100%;aspect-ratio:16/9;object-fit:cover;background:${T.blueLight};display:block}
+.pb{padding:22px;display:flex;flex-direction:column;flex:1}.tag{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${T.blue};margin-bottom:6px}
+.pb h3{font-family:${T.head};font-size:1.1rem;color:${T.navy};margin-bottom:6px}.pb p{color:${T.muted};font-size:.9rem;flex:1;margin-bottom:12px}
+.pb .tag{flex:none;margin-bottom:6px;font-size:.72rem;color:${T.blue}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none}.chips li{background:${T.blueLight};color:${T.blue};border-radius:100px;padding:3px 11px;font-size:.75rem;font-weight:700}
+.tg{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));gap:24px;margin-top:40px}
+.tg figure{position:relative;border-radius:20px;overflow:hidden;aspect-ratio:16/9;background:${T.navy}}.tg img{width:100%;height:100%;object-fit:cover;display:block}
+.tg figcaption{position:absolute;inset:auto 0 0;padding:40px 20px 16px;background:linear-gradient(transparent,rgba(7,9,28,.92));color:#fff;font-family:${T.head};font-weight:700}
+.steps{list-style:none;counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:20px;margin-top:40px}
+.steps li{counter-increment:s;background:${T.off};border:1px solid ${T.border};border-radius:16px;padding:24px}
+.steps li::before{content:counter(s);display:flex;width:34px;height:34px;border-radius:50%;background:${T.blue};color:#fff;font-weight:700;align-items:center;justify-content:center;margin-bottom:12px}
+.steps h3{font-family:${T.head};font-size:1.05rem;color:${T.navy};margin-bottom:6px}.steps p{font-size:.9rem;color:${T.muted}}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:22px;margin-top:40px}
+.q{background:#fff;border:1px solid ${T.border};border-radius:18px;padding:26px}.q blockquote{color:${T.text};font-size:.95rem;margin-bottom:14px}.q b{font-family:${T.head};color:${T.navy}}.q span{display:block;color:${T.muted};font-size:.82rem}
+.mv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);background:${T.navy};border-radius:20px;overflow:hidden;margin-top:40px}
+.mv>div{padding:36px 32px}.mv>div+div{border-left:1px solid rgba(255,255,255,.1)}.mv h3{font-family:${T.head};color:${T.yellow};margin-bottom:10px}.mv p{color:rgba(255,255,255,.8);font-size:.95rem}
+.founder{display:grid;grid-template-columns:300px minmax(0,1fr);gap:56px;align-items:start;max-width:1200px;margin:auto}
+.fcard{background:#fff;border:1px solid ${T.border};border-radius:20px;padding:32px;text-align:center}.fcard img{border-radius:50%;border:3px solid ${T.yellow};object-fit:cover;margin:0 auto 14px;display:block}
+.fname{font-family:${T.head};font-size:1.17rem;font-weight:700;color:${T.navy}}.fcard .role{color:${T.blue};font-weight:700;font-size:.85rem;margin:4px 0 14px}.fcard div{display:flex;justify-content:center;gap:22px}
+.fmsg{display:flex;flex-direction:column;gap:18px}.fmsg p{color:${T.muted};font-weight:300}
+.quote{background:${T.navy};border-radius:16px;padding:24px 28px}.quote q{font-family:${T.head};font-size:1.1rem;font-weight:600;color:#fff;quotes:none;display:block}.quote cite{display:block;margin-top:10px;color:${T.yellow};font-weight:600;font-size:.85rem;font-style:normal}
+.cta{background:${T.yellow};padding:52px 5%}.cta-in{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:22px}
+.cta h2{font-family:${T.head};font-size:clamp(1.4rem,3vw,2rem);font-weight:800;color:${T.navy}}.cta p{color:rgba(10,15,46,.8)}.btn-n{background:${T.navy};color:#fff}
+@media(max-width:860px){
+.hero-in,.founder,.mv,.row,.svcs{grid-template-columns:minmax(0,1fr);gap:28px}
+.hero-art{display:none}
+.mv>div+div{border-left:none;border-top:1px solid rgba(255,255,255,.1)}
+.btn-o{margin:12px 0 0}
+.fcard{max-width:380px;width:100%;margin:0 auto}
+.crumbs{margin-bottom:24px}
+}
+@media(max-width:600px){
+.sec{padding:60px 5%}
+.hero{padding:32px 5% 56px}.hero::before{width:5px}
+.btn{display:block;text-align:center}
+.row{padding:24px 20px;gap:22px}.row h3{font-size:1.3rem}
+.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats b{font-size:1.8rem}
+.mv>div{padding:26px 22px}
+.tg figcaption{padding:32px 16px 12px;font-size:.92rem}
+.cta{padding:40px 5%}.cta-in .btn{width:100%}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 `;
 
-/* ─────────────────────────────────────────────────────────────
-   INLINE SVG ICONS
-   ───────────────────────────────────────────────────────────── */
-const Ic = {
-  globe: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
-  graduation: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
-  factory: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 20V7l6-3v16M8 20V11l6-3v12M14 20V9l6-2v13"/><line x1="2" y1="20" x2="22" y2="20"/></svg>,
-  code: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>,
-  book: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
-  users: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  arrow: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
-  rocket: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>,
-  heart: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
-  star: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
-  linkedin: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>,
-  mail: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
-};
+const AboutServices = () => (
+  <main id="top">
+    <style>{CSS}</style>
+    <Seo />
 
-/* ─────────────────────────────────────────────────────────────
-   SCROLL REVEAL HOOK
-   ───────────────────────────────────────────────────────────── */
-function useReveal() {
-  useEffect(() => {
-    const ob = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("nt-visible"); ob.unobserve(e.target); } }),
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll(".nt-reveal").forEach((el) => ob.observe(el));
-    return () => ob.disconnect();
-  }, []);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   DATA
-   ───────────────────────────────────────────────────────────── */
-const FEATURES = [
-  {
-    img: "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=640&q=80",
-    badge: "Web",
-    icon: Ic.globe,
-    title: "Personal & Company Websites",
-    text: "Modern, responsive websites for individuals, startups, and businesses to establish a powerful online presence — built with performance and SEO in mind.",
-    link: "/#contact",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=640&q=80",
-    badge: "Academic",
-    icon: Ic.graduation,
-    title: "Student Final Year Projects",
-    text: "End-to-end support for final year engineering projects in software, hardware, IoT, AI, robotics, and embedded systems — from concept to submission.",
-    link: "/#contact",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=640&q=80",
-    badge: "Industry",
-    icon: Ic.factory,
-    title: "Industry-Level Projects",
-    text: "End-to-end industrial automation projects, prototypes, and scalable tech systems for startups and established businesses.",
-    link: "/#contact",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=640&q=80",
-    badge: "Dev",
-    icon: Ic.code,
-    title: "Software & Hardware Solutions",
-    text: "From mobile apps and desktop tools to embedded hardware and IoT devices — tailored tech solutions that solve real-world problems.",
-    link: "/#contact",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=640&q=80",
-    badge: "Research",
-    icon: Ic.book,
-    title: "Research & Thesis Support",
-    text: "Practical guidance for research theses, academic papers, and innovative ideas — from literature review to final implementation.",
-    link: "/#contact",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=640&q=80",
-    badge: "Training",
-    icon: Ic.users,
-    title: "Mentorship & Training",
-    text: "Hands-on workshops, mentorship programs, and internship opportunities in IoT, robotics, AI, and full-stack development.",
-    link: "/#contact",
-  },
-];
-
-const CEO_VALUES = [
-  { icon: Ic.rocket, label: "Innovation First" },
-  { icon: Ic.heart,  label: "Student-Centred" },
-  { icon: Ic.star,   label: "Quality Driven" },
-  { icon: Ic.users,  label: "Community Impact" },
-];
-
-const NUMBERS = [
-  { val: "20+", lbl: "Projects Delivered",        accent: false },
-  { val: "6",    lbl: "Service Domains",            accent: false },
-  { val: "200+",  lbl: "Students Trained",   accent: true  },
-  { val: "98%",  lbl: "Client Satisfaction Rate",  accent: false },
-  { val: "24h",  lbl: "Response Guarantee",         accent: false },
-];
-
-/* ─────────────────────────────────────────────────────────────
-   COMPONENT
-   ───────────────────────────────────────────────────────────── */
-const AboutUs = () => {
-  useReveal();
-
-  return (
-    <>
-      {/* Inject CSS */}
-      <style>{ABOUT_CSS}</style>
-
-      {/* ── JSON-LD: Organization + AboutPage ─────────────────── */}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": ["Organization", "AboutPage"],
-        "name": "NovaTech Innovative Solutions",
-        "url": "https://www.novatech-is.in/about",
-        "description": "NovaTech Innovative Solutions provides software development, hardware & IoT, AI projects, academic guidance, research support, and professional training workshops.",
-        "founder": {
-          "@type": "Person",
-          "name": "Chandramouli Haldar",
-          "jobTitle": "Founder & CEO",
-          "worksFor": { "@type": "Organization", "name": "NovaTech Innovative Solutions" }
-        },
-        "knowsAbout": ["Software Development", "IoT", "Embedded Systems", "AI", "Machine Learning", "Academic Project Guidance", "Training & Workshops"],
-        "serviceArea": { "@type": "Country", "name": "India" }
-      })}} />
-
-         <main>
-        {/* ── ABOUT HERO ────────────────────────────────────── */}
-        <section className="about-hero" aria-labelledby="about-heading">
-          <div className="about-hero-inner">
-            {/* Left */}
-            <div>
-              <div className="about-badge">💡 Your Innovation Partner</div>
-              <h1 className="about-h1" id="about-heading">
-                Who We <em>Are</em> &amp;<br />What We Stand For
-              </h1>
-              <p className="about-hero-desc">
-                At <strong style={{ color: "rgba(255,255,255,0.85)", fontWeight: 500 }}>NovaTech Innovative Solutions</strong>, we specialize in end-to-end solutions for students, professionals, and industries — transforming ideas into impactful technology with passion and precision.
-              </p>
-              <a href="/#contact" className="about-hero-cta">
-                Work With Us
-                <span style={{ display: "flex", width: 16, height: 16 }}>{Ic.arrow}</span>
-              </a>
-            </div>
-
-            {/* Right — CEO snapshot */}
-                         
-             
-            </div>
-        
-        </section>
-
-        {/* ── TRUST BAR ─────────────────────────────────────── */}
-        <div className="nt-trust" role="complementary" aria-label="Trust signals">
-          <div className="nt-trust-inner">
-            {[["🎓","Academic Specialists"], ["⚙️","End-to-End Delivery"], ["✅","Transparent Pricing"], ["🤝","Dedicated Mentorship"]].map(([ic, lb]) => (
-              <span key={lb} className="nt-trust-item"><span>{ic}</span>{lb}</span>
-            ))}
-          </div>
+    <section className="hero" aria-labelledby="about-h">
+      <div className="hero-in">
+        <div>
+          <p className="badge">From Ideas to Innovation</p>
+          <h1 className="h1" id="about-h">About NovaTech: <em>IoT, AI/ML Solutions, Training &amp; R&amp;D</em></h1>
+          <p className="lead">NovaTech Innovative Solutions is one team for practical hardware and software solutions, hands-on student training and research support. Based in India, we turn ideas into working products, skills and publications.</p>
+          <a href={WA} className="btn btn-y">Get a free consultation</a>
+          <a href="#services" className="btn btn-o">See our services</a>
         </div>
+        <Hero3 />
+      </div>
+    </section>
 
-        {/* ── WHAT WE DO ────────────────────────────────────── */}
-        <section
-          id="what-we-do"
-          className="nt-section about-bg-white"
-          aria-labelledby="features-heading"
-        >
-          <div className="nt-section-inner">
-            <p className="nt-section-label nt-reveal">What We Do</p>
-            <h2 className="nt-section-title nt-reveal" id="features-heading">
-              Six Ways We Deliver Value
-            </h2>
-            <p className="nt-section-sub nt-reveal">
-              From personal websites to industrial-grade systems — NovaTech bridges the gap between education and the real world.
-            </p>
+    {STATS.length > 0 && (
+      <section className="dark" style={{ padding: "44px 5%" }} aria-label="NovaTech at a glance">
+        <div className="stats">{STATS.map(([n, l]) => (<div key={l}><b>{n}</b><span>{l}</span></div>))}</div>
+      </section>
+    )}
 
-            <div className="about-grid" role="list">
-              {FEATURES.map((f, i) => (
-                <article
-                  key={f.title}
-                  className={`about-card nt-reveal nt-reveal-d${(i % 3) + 1}`}
-                  role="listitem"
-                  aria-labelledby={`feat-${i}`}
-                >
-                  <div className="about-card-img-wrap">
-                    <img
-                      src={f.img}
-                      alt={`NovaTech — ${f.title}`}
-                      className="about-card-img"
-                      loading="lazy"
-                    />
-                    <span className="about-card-badge">{f.badge}</span>
-                  </div>
-                  <div className="about-card-body">
-                    <div className="about-card-icon" aria-hidden="true">{f.icon}</div>
-                    <h3 className="about-card-title" id={`feat-${i}`}>{f.title}</h3>
-                    <p className="about-card-text">{f.text}</p>
-                    <a href={f.link} className="about-card-link">
-                      Learn more <span style={{ display: "flex", width: 13, height: 13 }}>{Ic.arrow}</span>
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── MISSION & VISION ──────────────────────────────── */}
-        <section className="nt-section about-bg-off" aria-labelledby="mv-heading">
-          <div className="nt-section-inner">
-            <p className="nt-section-label nt-reveal">Our Purpose</p>
-            <h2 className="nt-section-title nt-reveal" id="mv-heading">Mission &amp; Vision</h2>
-            <div className="mv-strip nt-reveal nt-reveal-d1">
-              <div className="mv-block">
-                <div className="mv-label">Our Mission</div>
-                <div className="mv-title">Empower Through Technology</div>
-                <p className="mv-text">
-                  To empower students, startups, and industries with innovative solutions that merge creativity, technology, and education — making cutting-edge tech accessible to everyone.
-                </p>
-              </div>
-              <div className="mv-block">
-                <div className="mv-label">Our Vision</div>
-                <div className="mv-title">Bridge Academia &amp; Industry</div>
-                <p className="mv-text">
-                  To be India's most trusted innovation partner — where every student's idea finds a path to real-world impact, and every business finds a reliable technology companion.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── NUMBERS ───────────────────────────────────────── */}
-        <section className="nt-section about-bg-white" aria-labelledby="nums-heading">
-          <div className="nt-section-inner" style={{ textAlign: "center" }}>
-            <p className="nt-section-label nt-reveal">By the Numbers</p>
-            <h2 className="nt-section-title nt-reveal" id="nums-heading">NovaTech at a Glance</h2>
-            <div className="nums-grid">
-              {NUMBERS.map((n, i) => (
-                <div key={n.val} className={`num-card nt-reveal nt-reveal-d${i + 1}${n.accent ? " accent" : ""}`}>
-                  <div className="num-val">{n.val}</div>
-                  <div className="num-lbl">{n.lbl}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── CEO SECTION ───────────────────────────────────── */}
-        <section
-          id="founder"
-          className="nt-section ceo-section"
-          aria-labelledby="ceo-heading"
-          itemScope
-          itemType="https://schema.org/Person"
-        >
-          <div className="ceo-inner">
-            {/* Sticky card */}
-            <div className="ceo-card nt-reveal">
-              <img
-                src="/CEO_DP.jpg"
-                alt="Chandramouli Haldar, Founder and CEO of NovaTech Innovative Solutions"
-                className="ceo-photo"
-                itemProp="image"
-              />
-              <div className="ceo-name" itemProp="name">Chandramouli Haldar</div>
-              <div className="ceo-role" itemProp="jobTitle">Founder &amp; CEO</div>
-              <hr className="ceo-divider" />
-              <div className="ceo-stat-row">
-                <div className="ceo-stat">
-                  <div className="ceo-stat-num">20+</div>
-                  <div className="ceo-stat-lbl">Projects Led</div>
-                </div>
-                <div className="ceo-stat">
-                  <div className="ceo-stat-num">200+</div>
-                  <div className="ceo-stat-lbl">Trained</div>
-                </div>
-              </div>
-              <div className="ceo-socials" aria-label="Founder social links">
-                <a
-                  href="https://www.linkedin.com/in/chandramouli01/"
-                  className="ceo-social-btn"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Chandramouli Haldar on LinkedIn"
-                >
-                  <span style={{ display: "flex" }}>{Ic.linkedin}</span>
-                </a>
-                <a
-                  href="mailto:chandramoulihaldar@gmail.com"
-                  className="ceo-social-btn"
-                  aria-label="Email NovaTech"
-                >
-                  <span style={{ display: "flex" }}>{Ic.mail}</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="ceo-content">
-              <div className="nt-reveal">
-                <h2 className="ceo-msg-title" id="ceo-heading">
-                  Message from the<br /><em>Founder &amp; CEO</em>
-                </h2>
-              </div>
-
-              <p className="ceo-para nt-reveal nt-reveal-d1" itemProp="description">
-                At NovaTech, our mission has always been clear — to empower students, startups, and industries with innovative solutions that merge creativity, technology, and education. We don't just build projects; we build futures.
-              </p>
-              <p className="ceo-para nt-reveal nt-reveal-d2">
-                From final year academic projects to large-scale industrial deployments, our goal is to bridge the gap between academia and the real world. Every idea brought to us is treated with the same passion and precision — whether it's a student's first IoT prototype or a company's next product launch.
-              </p>
-              <p className="ceo-para nt-reveal nt-reveal-d3">
-                We believe technology should be accessible, affordable, and impactful. That's why NovaTech operates on a foundation of transparency, mentorship, and genuine care for every client and student we work with.
-              </p>
-
-              <div className="ceo-quote-block nt-reveal nt-reveal-d2">
-                <p className="ceo-quote-text">
-                  Your ideas, our innovation — together we build the future.
-                </p>
-                <p className="ceo-quote-attr">— Chandramouli Haldar, Founder &amp; CEO</p>
-              </div>
-
+    <section className="sec" id="services" aria-labelledby="svc-h">
+      <div className="in">
+        <h2 className="h2" id="svc-h">Our services: three pillars, one team</h2>
+        <p className="sub">Each pillar has its own page with full details, pricing and examples.</p>
+        <div className="rows">
+          {PILLARS.map((p) => (
+            <article className="row" key={p.id} id={p.id}>
               <div>
-                <p className="nt-section-label nt-reveal" style={{ marginBottom: 14 }}>Core Values</p>
-                <div className="ceo-values nt-reveal nt-reveal-d1">
-                  {CEO_VALUES.map((v) => (
-                    <div key={v.label} className="ceo-value-chip">
-                      <div className="ceo-value-icon" aria-hidden="true">
-                        <span style={{ display: "flex", width: 15, height: 15 }}>{v.icon}</span>
-                      </div>
-                      <span className="ceo-value-label">{v.label}</span>
-                    </div>
-                  ))}
-                </div>
+                <div className="ico"><Ico n={p.icon} /></div>
+                <h3>{p.title}</h3>
+                <p className="sub">{p.pitch}</p>
+                <p className="best"><strong>Best for:</strong> {p.best}</p>
+                <a className="plink" href={p.href}>{p.cta} →</a>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── CTA STRIP ─────────────────────────────────────── */}
-        <div className="about-cta" role="complementary">
-          <div className="about-cta-inner">
-            <div>
-              <h2>Ready to Start Your Project?</h2>
-              <p>Let's turn your idea into reality — consultation is free.</p>
-            </div>
-            <a href="/#contact" className="about-cta-btn">
-              Contact NovaTech
-              <span style={{ display: "flex", width: 16, height: 16 }}>{Ic.arrow}</span>
-            </a>
-          </div>
+              <ul className="svcs">{p.svcs.map(([n, d]) => (<li key={n}><b>{n}</b><span>{d}</span></li>))}</ul>
+            </article>
+          ))}
         </div>
-      </main>
+      </div>
+    </section>
 
+    <section className="sec light" id="projects" aria-labelledby="proj-h">
+      <div className="in">
+        <h2 className="h2" id="proj-h">Featured projects we have built</h2>
+        { <p className="sub">A sample of our IoT, embedded and AI work. </p> } 
+        <div className="pgrid">
+          {PROJECTS.map(([t, tag, img, d, stack]) => (
+            <article className="pc" key={t}>
+              <img src={img} alt={`${t}: ${tag} project by NovaTech`} loading="lazy" decoding="async" width="600" height="338" />
+              <div className="pb">
+                <p className="tag">{tag}</p><h3>{t}</h3><p>{d}</p>
+                <ul className="chips" aria-label="Technologies used">{stack.map((s) => <li key={s}>{s}</li>)}</ul>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
 
-    </>
-  );
-};
+    <section className="sec" aria-labelledby="how-h">
+      <div className="in">
+        <h2 className="h2" id="how-h">How we work with you</h2>
+        <ol className="steps">{STEPS.map(([t, d]) => (<li key={t}><h3>{t}</h3><p>{d}</p></li>))}</ol>
+      </div>
+    </section>
 
-export default AboutUs;
+    <section className="sec light" id="training-gallery" aria-labelledby="tr-h">
+      <div className="in">
+        <h2 className="h2" id="tr-h">Hands-on training across engineering colleges</h2>
+        <p className="sub">Project-based IoT, embedded and AI/ML workshops for students. <a className="plink" href="/training">See training programs</a></p>
+        <div className="tg">{TRAIN.map(([src, alt, cap]) => (<figure key={cap}><img src={src} alt={alt} loading="lazy" decoding="async" width="800" height="450" /><figcaption>{cap}</figcaption></figure>))}</div>
+      </div>
+    </section>
+
+    {QUOTES.length > 0 && (
+      <section className="sec" aria-labelledby="rev-h">
+        <div className="in">
+          <h2 className="h2" id="rev-h">What students and clients say</h2>
+          <div className="qs">{QUOTES.map(([q, n, r]) => (<figure className="q" key={n}><blockquote>“{q}”</blockquote><figcaption><b>{n}</b><span>{r}</span></figcaption></figure>))}</div>
+          <div className="tg">{FEEDBACK.map(([src, alt, cap]) => (<figure key={cap}><img src={src} alt={alt} loading="lazy" decoding="async" width="800" height="450" /><figcaption>{cap}</figcaption></figure>))}</div>
+        </div>
+      </section>
+    )}
+
+    <section className="sec light" aria-labelledby="mv-h">
+      <div className="in">
+        <h2 className="h2" id="mv-h">Our mission and vision</h2>
+        <div className="mv">
+          <div><h3>Mission</h3><p>To bridge the gap between education, technology and research by delivering innovative hardware and software solutions, practical industry-relevant training, and R&amp;D support, empowering students, researchers, institutions and businesses to turn ideas into practical solutions.</p></div>
+          <div><h3>Vision</h3><p>To become a trusted technology and research organization in India, fostering a culture of innovation, learning and scientific advancement, and strengthening the connection between academia, industry and research.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section className="sec" id="founder" aria-labelledby="ceo-h">
+      <div className="founder">
+        <div className="fcard">
+          <img src="/CEO_DP.jpg" alt="Portrait of Chandramouli Haldar, Founder and CEO of NovaTech" width="130" height="130" loading="lazy" decoding="async" />
+          <p className="fname">Chandramouli Haldar</p><p className="role">Founder &amp; CEO</p>
+          <div><a className="plink" href={LINKEDIN} target="_blank" rel="noopener noreferrer">LinkedIn</a><a className="plink" href={EM}>Email</a></div>
+        </div>
+        <div className="fmsg">
+          <h2 className="h2" id="ceo-h">Message from the Founder</h2>
+          <p>At NovaTech our mission is clear: empower students, startups and industries with solutions that combine creativity, technology and education. We don't just build projects; we build futures.</p>
+          <p>Every idea gets the same care, whether it is a student's first IoT prototype or a company's next product. We work on transparency, mentorship and genuine care for every client and student.</p>
+          <blockquote className="quote"><q>Your ideas, our innovation. Together we build the future.</q><cite>Chandramouli Haldar, Founder &amp; CEO</cite></blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section className="cta" aria-labelledby="cta-h">
+      <div className="cta-in">
+        <div><h2 id="cta-h">Ready to build, learn or research with us?</h2><p>Consultation is free. Tell us about your idea.</p></div>
+        <a href="/contact" className="btn btn-n">Contact NovaTech</a>
+      </div>
+    </section>
+  </main>
+);
+
+export default AboutServices;

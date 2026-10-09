@@ -1,10 +1,8 @@
+
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import ScrollToHash from "./components/ScrollToHash";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -13,42 +11,39 @@ import Home from "./components/Home";
 import About from "./components/About";
 import Features from "./components/Features";
 import Contact from "./components/Contact";
-import Career from "./components/Carrer";
-import Pricing from "./components/Pricing";
 import NovaTechLab from "./components/NovaTechLab";
-import Projectmaker from "./components/projectmaker";
+import Training from "./components/Training";
+
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import TermsOfService from "./components/TermsOfService";
 
 const Layout = () => {
-  const location = useLocation();
-
-  // Pages where Navbar/Footer should be hidden
-  const hiddenLayoutPages = ["/lab"];
-
-  const hideLayout = hiddenLayoutPages.includes(location.pathname);
-
   return (
     <>
-      {!hideLayout && <Navbar />}
+      <Navbar />
+
+      <ScrollToHash />
 
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/features" element={<Features />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/career" element={<Career />} />
-        <Route path="/pricing" element={<Pricing />} />
+
+        {/* Training */}
+        <Route path="/training" element={<Training />} />
 
         {/* Privacy Policy */}
-        <Route  path="/privacy-policy" element={<PrivacyPolicy />}
+        <Route
+          path="/privacy-policy"
+          element={<PrivacyPolicy />}
         />
 
-          {/* Terms Of Service */}
-        <Route  path="/Terms-Of-Service" element={<TermsOfService />}
+        {/* Terms of Service */}
+        <Route
+          path="/terms-of-service"
+          element={<TermsOfService />}
         />
-
-        <Route path="/projectmaker" element={<Projectmaker />} />
 
         {/* NovaTech Lab */}
         <Route path="/lab" element={<NovaTechLab />} />
@@ -70,16 +65,16 @@ const Layout = () => {
         />
       </Routes>
 
-      {!hideLayout && <Footer />}
+      <Footer />
     </>
   );
 };
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Layout />
-    </Router>
+    </BrowserRouter>
   );
 }
 
